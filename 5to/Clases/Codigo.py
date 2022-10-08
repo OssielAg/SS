@@ -321,6 +321,14 @@ def superMesh(su,sv,loMs):
         i = (i+1)*m.prof
     return sM
 
+def blackPh():
+    m=rectMesh(3.3061099052,4.552418232)
+    p1,p2=(0.000000000,0.913483083),(0.500000000,0.579813302)
+    p3,p4=(0.000000000,0.079836130),(0.500000000,0.413437814)
+    ats =[Atomo(p1,sig='P',posZ=0.266835123),Atomo(p2,sig='P',posZ=0.266945183),Atomo(p3,sig='P',posZ=0.181006327),Atomo(p4,sig='P',posZ=0.181094214)]
+    m.atms[0] = ats
+    return m
+
 def hexa6(p,atms=['C','C'],name=''):
     '''Crea una Malla exagonal s6'''
     u,v=(p,0.0),(-p/2,math.sqrt(3)*(p/2))
