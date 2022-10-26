@@ -255,6 +255,17 @@ class Malla:
             natms.append(limpia(atms))
         res.atms=natms
         return res
+    
+    def vectors(self):
+        return (self.u, self.v)
+    
+    
+    def setNewVectors(self, newA, newB):
+        th = cAng((1,0),newA)
+        self.theta = th
+        self.u, self.v = newA, newB
+        self.OriginalU = rota(newA, -th)
+        self.OriginalV = rota(newB, -th)
 
 '''-------------------------------------------------------------------------------------------------------------'''
 # Metodos derivados
