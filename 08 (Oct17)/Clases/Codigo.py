@@ -99,6 +99,7 @@ class Atomo:
 class Malla:
     def __init__(self, u, v, theta = 0.0, atms=[], enls=[], name='', prof=1):
         lols = []
+        self.enls=[]
         (u1,u2),(v1,v2) = u,v
         ang = abs(cAng(u,v))
         
