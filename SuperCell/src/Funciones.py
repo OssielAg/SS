@@ -194,3 +194,173 @@ def buscaSVect(vectU,vectV, th, rango=15, limDelta=0.1, show=True):
                             res[1].append([[a,b],[round(c),round(d)],delta])
                             print(">>({},{})-({},{}): Delta={}%".format(a,b,round(c),round(d),delta*100,":",dist(r1,r2)))
     return res
+
+def calculaPares(r1, r2, th = 0.0, maxIt=15, eps=0.1, show=False):
+    '''
+    Calcula los pares enteros (a,b) y (c,d) tales que si u,v son los vectores generadores de 'r1' y rp,rq los
+    vectores generadores de 'r2' rotada en 'th' grados, entonces P1 = (au + bv) y P2 = (c(rp) + d(rq)) difieren en
+    menos de 'eps', además a y b son a lo más 'maxIt'
+    
+    Regresa una lista doble con todos los resultados que cumplen lo anterior separados en los que tienen b positiva
+    y b negativa (hace la busqueda en los cuadrantes I y IV del plano cartesiano), además regresa tambien el promedio
+    de los errores mínimos en ambas sonas.
+    '''
+    (u,v), (p,q) = r1.getVectors(), r2.getVectors()
+    (u_1,u_2), (v_1,v_2) = u, v
+    (p_1,p_2), (q_1,q_2) = rp, rq = rota(p,th), rota(q,th)
+    if th==0.0:
+        th=r2.theta
+    res = [[],[]]
+    f = 1/2 # Factor de importancia de el tamaño del vector resultante
+    rango = maxIt
+    delta = 0.0
+    minE1 = 100
+    minE2 = 100
+    eq0 = (p_2*q_1)-(p_1*q_2)
+    eq1 = (q_1*u_2)-(q_2*u_1)
+    eq2 = (q_1*v_2)-(q_2*v_1)
+    eq3 = (p_2*u_1)-(p_1*u_2)
+    eq4 = (p_2*v_1)-(p_1*v_2)
+    for k in range(1,(2*rango)+1):
+        for i in range(k+1):
+            j = k-i
+            if(i<(rango+1) and j<(rango+1)):
+                # Buscando en b+
+                a,b = i,-j
+                c = ((eq1*a)+(eq2*b))/(eq0)
+                d = ((eq3*a)+(eq4*b))/(eq0)
+                # Vector esperado
+                r1 = m2V(u,v,(a,b))
+                #Vector aproximado
+                r2 = m2V(rp,rq,(round(c),round(d)))
+                # Calcula la proporción entre el tamaño del vector esperado y el aproximado
+                delta = long(r1)/long(r2)
+                err = dist(r1,r2)#/(long(r2)*f)
+                #print("-({},{}),({},{}):Err={}".format(a,b,round(c),round(d),err))
+                if err < minE1:
+                    minE1 = err
+                if (err < eps):
+                    #print(1-delta)
+                    if(abs(1-delta) < 0.07):
+                        res[0].append([[a,b],[round(c),round(d)],delta,err])
+                        if show:
+                            print(">{:.3f}°:({},{})-({},{}): Delta={}%".format(th,a,b,round(c),round(d),delta*100),":",dist(r1,r2))
+                # Buscando en b-
+                if j!=0:
+                    a,b = i,j
+                    c = ((eq1*a)+(eq2*b))/(eq0)
+                    d = ((eq3*a)+(eq4*b))/(eq0)
+                    # Vector esperado
+                    r1 = sumaV(multV(a,u),multV(b,v))
+                    #Vector aproximado
+                    r2 = sumaV(multV(round(c),rp),multV(round(d),rq))
+                    # Calcula la proporción entre el tamaño del vector esperado y el aproximado
+                    if((long(r1)!=0.0) & (long(r2)!=0.0)):
+                        delta = long(r1)/long(r2)
+                    err = dist(r1,r2)#/(long(r2)*f)
+                    #print("--({},{}),({},{}):Err={}".format(a,b,round(c),round(d),err))
+                    if err < minE2:
+                        minE2 = err
+                    if (err < eps):
+                        if(abs(1-delta)<0.07):
+                            res[1].append([[a,b],[round(c),round(d)],delta,err])
+                            if show:
+                                print(">>{:.3f}°:({},{})-({},{}): Delta={}%".format(th,a,b,round(c),round(d),delta*100),":",dist(r1,r2))
+    if (minE1+minE2)/2 < 0.5:
+        if show: print("----------\n{:.3f}°:{}\n\tdelta1={}\n\tdelta2={}\n----------".format(th,(minE1+minE2)/2,minE1,minE2))
+    return res, ((minE1+minE2)/2)
+
+def calculaEM(r1, r2, th = 0.0, maxIt=15):
+    '''
+    Calcula los pares enteros (a,b) y (c,d) con a y b <maxIt tales que si u,v son los vectores generadores de 'r1' y rp,rq los
+    vectores generadores de 'r2' rotada en 'th' grados, entonces P1 = (au + bv) y P2 = (c(rp) + d(rq)) son cercanos.
+    
+    Regresa tambien el promedio de los las diferencias mínimas en los cuadrantes I y IV del plano cartesiano que cumplen lo anterior.
+    
+    *Es una función auxiliar de la función 'explora'
+    '''
+    (u,v), (p,q) = r1.getVectors(), r2.getOV()
+    (u_1,u_2), (v_1,v_2) = u, v
+    (p_1,p_2), (q_1,q_2) = rp, rq = rota(p,th), rota(q,th)
+    rango = maxIt
+    minE1 = 100
+    minE2 = 100
+    eq0 = (p_2*q_1)-(p_1*q_2)
+    eq1 = (q_1*u_2)-(q_2*u_1)
+    eq2 = (q_1*v_2)-(q_2*v_1)
+    eq3 = (p_2*u_1)-(p_1*u_2)
+    eq4 = (p_2*v_1)-(p_1*v_2)
+    for k in range(1,(2*rango)+1):
+        for i in range(k+1):
+            j = k-i
+            if(i<(rango+1) and j<(rango+1)):
+                # Buscando en b+
+                a,b = i,-j
+                c = ((eq1*a)+(eq2*b))/(eq0)
+                d = ((eq3*a)+(eq4*b))/(eq0)
+                # Vector esperado
+                r1 = m2V(u,v,(a,b))
+                #Vector aproximado
+                r2 = m2V(rp,rq,(round(c),round(d)))
+                err = dist(r1,r2)
+                if err < minE1:
+                    minE1 = err
+                # Buscando en b-
+                if j!=0:
+                    a,b = i,j
+                    c = ((eq1*a)+(eq2*b))/(eq0)
+                    d = ((eq3*a)+(eq4*b))/(eq0)
+                    # Vector esperado
+                    r1 = sumaV(multV(a,u),multV(b,v))
+                    #Vector aproximado
+                    r2 = sumaV(multV(round(c),rp),multV(round(d),rq))
+                    err = dist(r1,r2)
+                    if err < minE2:
+                        minE2 = err
+    return ((minE1+minE2)/2)
+
+def explora(r1, r2, mIt=15, eMax=0.5, thI=0.0, thF=180.0, acc=1):
+    '''
+    Hace una exploracion para angulos entre 'thI' y 'thF' en un intervalo de 10^(-'acc') grados para obtener
+    una estimación del error minimo para pares de enteros menores a 'mIt' del sistema de coordenadas con base
+    en los vectores generadores de 'r1' y sus contrapartes enteras en el sistema de coordenadas con base en
+    los vectores generadores de 'r2'.
+    '''
+    graf = []
+    i = round(thI*(10**acc))
+    f = round(thF*(10**acc))
+    print("Analizando para theta en intervalo [{}°,{}°]".format(i/(10**acc),f/(10**acc)))
+    print(".............")
+    for t in range(i,f+1):
+        theta = t/(10**acc)
+        b = "Analizando...Theta = "+str(theta)+"°"
+        print(b,end="\r")
+        m = calculaEM(r1, r2, th = theta, maxIt=mIt)
+        if m < eMax:
+            graf.append([theta,m])
+    print(end="\r")
+    print('**********Exploración finalizada**********')
+    return np.array(graf)
+   
+def analiza(r1,r2,roAng=(0.0,180.0),erMax=0.005,mor=15,accuracy=2):
+    '''
+    Ejecuta la función 'explora' para las redes 'r1' y 'r2' para thetas en el intervalo 'roAng' con un mIt igual a 'mor'
+    y un acc igual a accuracy.
+    Analiza los resultados imprimiendo una gráfica de la relación Theta vs error_minimo_aproximado y regresa una lista
+    con los ángulos cuyo error_mínimo_aproximado es menor a 'erMax'.
+    Tambien regresa la lista resultante de la función 'explora'
+    '''
+    (i,f) = roAng
+    graf = explora(r1, r2, mIt=mor, thI=i, thF=f, acc=accuracy)
+    xs, ys = graf[:,0], graf[:,1]
+    plt.plot(xs, ys)
+    plt.show()
+    resultados=[]
+    analisis=np.r_[True, ys[1:] < ys[:-1]] & np.r_[ys[:-1:] < ys[1:], True]
+    print("**********\nLos ángulos con los errores mínimos son:")
+    for i in range(len(analisis)):
+        if analisis[i]==True:
+            if(ys[i]<erMax):
+                resultados.append([xs[i],ys[i]])
+                print("\t{:.3f} : {:.5f}".format(xs[i],ys[i]))
+    return resultados,graf

@@ -162,6 +162,34 @@ class Red:
         data = data+atms
         return data
     
+    def aligned(self):
+        '''
+        Alinea una Red con el eje X
+        '''
+        self.a = self.OriginalA
+        self.b = self.OriginalB
+        self.theta = 0.0
+        
+    def rotate(self, th):
+        '''
+        Rota la Red tal cual está th grados.
+        '''
+        self.a = rota(self.OriginalA,self.theta + th)
+        self.b = rota(self.OriginalB,self.theta + th)
+        self.theta = self.theta + th
+    
+    def mAlig(self):
+        '''
+        Regresa una copia de la Red alineada al eje X
+        ''' 
+        na, nb = self.OriginalA, self.OriginalB
+        natms, nenls = self.atms.copy(), self.enls.copy()
+        nName = self.name+"(aligned)"
+        mr = Red(na, nb, enls=nenls, name=nName, prof=self.prof)
+        mr.atms = self.atms
+        mr.detachment = self.detachment
+        return mr
+    
     def mRot(self, ang):
         '''
         Regresa una copia de la Red rotada en "ang" grados
@@ -201,3 +229,9 @@ class Red:
         Regresa los Vectores generadores de la Red
         '''
         return (self.a, self.b)
+    
+    def getOV(self):
+        '''
+        Regresa los Vectores generadores sin rotación de la Red
+        '''
+        return (self.OriginalA, self.OriginalB)
