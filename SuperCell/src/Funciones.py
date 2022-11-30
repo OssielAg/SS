@@ -364,3 +364,73 @@ def analiza(r1,r2,roAng=(0.0,180.0),erMax=0.005,mor=15,accuracy=2):
                 resultados.append([xs[i],ys[i]])
                 print("\t{:.3f} : {:.5f}".format(xs[i],ys[i]))
     return resultados,graf
+
+def readFile(name):
+    '''
+    Lee el Archivo señalado y lo transforma en un arreglo de Strings de cada una de sus líneas
+    '''
+    file = open(name, 'r')
+    count = 0
+    lines = []
+    while True:
+        count+=1
+        line = file.readline()
+        if not line:
+            break
+        lines.append(format(line))
+    file.close()
+    return lines
+
+def leeNumeros(linea):
+    '''
+    Lee un string y regresa un lista con los numeros en el
+    '''
+    s = []
+    s = [float(l) for l in re.findall(r'-?\d+\.?\d*', linea)]
+    return s
+    
+def importa(name):
+    '''
+    Importa un archivo vasp y lo transforma en una Red
+    '''
+    errormsg = '''El archivo no tiene el formato soportado por el programa.
+Observe las caracteristicas soportadas escribiendo <importa?>'''
+    xyz = []
+    try:
+        # cargamos el nombre de la Red
+        lines = readFile(name+".vasp")
+        print("Se leerá el archivo {}".format(name+".vasp"))
+        nameRed = lines[0]
+        #Cargamos los vectores primitivos de la Red
+        vA = leeNumeros(lines[2])
+        vB = leeNumeros(lines[3])
+        vC = leeNumeros(lines[4])
+        #Cargamos una lista con los tipos de Átomos en la Red y una con el numero de átomos de ese tipo
+        toA = lines[5].split()
+        noA = leeNumeros(lines[6])
+        if (round(vA[2],5)!=0.0 or round(vB[2],5)!=0.0 or round(vC[0],5)!=0.0 or round(vC[1],5)!=0.0):
+            print("Vectores iniciales erroneos\n",errormsg)
+            raise SyntaxError('Documento no soportado')
+        aTipos = lines[5].split()
+        aCant = leeNumeros(lines[6])
+        if len(aTipos)!=len(aCant):
+            print("No coincide el número de Tipos")
+            raise SyntaxError('Documento no soportado')
+        atomos = []
+        ind = 8
+        for i in range(len(aTipos)):
+            col = ["#"+''.join([random.choice('ABCDEF0123456789') for i in range(6)])]
+            for j in range(round(aCant[i])):
+                pA = leeNumeros(lines[ind+j])
+                at = Atomo((pA[0], pA[1]), posZ=pA[2], color=col, sig=aTipos[i])
+                atomos.append(at)
+            ind = ind+round(aCant[i])
+        leido = Red((vA[0],vA[1]),(vB[0],vB[1]),atms=atomos,name=nameRed,detachment=vC[2])
+        print("--Red creada a partir del archivo '{}'--".format(name+".vasp"))
+        return leido
+    except FileNotFoundError:
+        print("No se identifica el Archivo con el nombre '{}'".format(name))
+    except IndexError:
+        print(errormsg)
+    except SyntaxError:
+        print(errormsg)

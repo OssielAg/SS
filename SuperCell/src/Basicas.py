@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import collections  as mc
 import math
+import random
+import re
 import os
 plt.rcParams['figure.figsize'] = (10, 10)
 

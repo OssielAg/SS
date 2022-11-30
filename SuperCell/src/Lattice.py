@@ -1,7 +1,7 @@
 from .Atomo import *
 
 class Red:
-    def __init__(self, vA, vB, atms=[], enls=[], name='', prof=1):
+    def __init__(self, vA, vB, atms=[], enls=[], name='',detachment=10, prof=1):
         '''
         Inicializa una Red con los vectores, su rotacion, lista de Atomos, lista de sus Enlaces, Nombre y nivel que ocupa en el apilamiento.
         Sus datos son...
@@ -24,7 +24,7 @@ class Red:
         
         rAngle = cRot(vA)
         if u2<0: rAngle=-rAngle
-        self.detachment = 10
+        self.detachment = detachment
         
         self.a = vA
         self.b = vB
