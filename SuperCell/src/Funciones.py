@@ -7,7 +7,7 @@ def isitin(r,cent, sr, slvl):
     Verifica que átomos pertenecientes a una celda de la Red "r" con centro en "cen" se encuentran en la celda principal de la Red "sr".
     Todos los átomos que lo estén se agregan a los átomos de sr
     '''
-    er = 1/(10**7) #Error de calculo aceptable en la frontera de la Celda unitaria de sr
+    er = 1/(10**4) #Error de calculo aceptable en la frontera de la Celda unitaria de sr
     (u1,u2) = r.a
     (v1,v2) = r.b
     (p1,p2) = sr.a
@@ -419,7 +419,7 @@ Observe las caracteristicas soportadas escribiendo <importa?>'''
         atomos = []
         ind = 8
         for i in range(len(aTipos)):
-            col = ["#"+''.join([random.choice('ABCDEF0123456789') for i in range(6)])]
+            col = black#["#"+''.join([random.choice('ABCDEF0123456789') for i in range(6)])]
             for j in range(round(aCant[i])):
                 pA = leeNumeros(lines[ind+j])
                 at = Atomo((pA[0], pA[1]), posZ=pA[2], color=col, sig=aTipos[i])

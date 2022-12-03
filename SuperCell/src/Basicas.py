@@ -61,3 +61,42 @@ def getLim(u,v,m,n):
     yma = max(a2,b2,c2,0)
     ymi = min(a2,b2,c2,0)
     return [xmi-1, xma+1], [ymi-1, yma+1]
+
+def pC(a,b):
+    '''
+    Calcula el producto Crux de los vectores a y b en R3
+    '''
+    a1,a2,a3 = a
+    b1,b2,b3 = b
+    return ((a2*b3-a3*b2),(a3*b1-a1*b3),(a1*b2-a2*b1))
+
+def pP(a,b):
+    '''
+    Calcula el producto punto de los vectores a y b en R3
+    '''
+    a1,a2,a3 = a
+    b1,b2,b3 = b
+    return a1*b1+a2*b2+a3*b3
+
+def to2D(v):
+    '''
+    Recibe un vector en R3 y regresa su proyección en R2
+    '''
+    x,y,z=v
+    return (x,y)
+
+def cRecip(a,b,c):
+    '''
+    Calcula los vectores de la Red en el espacio reciproco de la red formada por los vectores a,b,c en R3
+    '''
+    (a1,a2,a3) = a
+    (b1,b2,b3) = b
+    (c1,c2,c3) = c
+    e = math.pi/(pP(a,pC(b,c)))
+    (x,y,z) = pC(b,c)
+    u = (x*e, y*e, z*e)
+    (x,y,z) = pC(a,c)
+    v = (x*e, y*e, z*e)
+    (x,y,z) = pC(a,b)
+    w = (x*e, y*e, z*e)
+    return [u,v,w]

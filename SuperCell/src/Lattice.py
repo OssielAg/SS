@@ -34,6 +34,9 @@ class Red:
         self.theta = cAng((1,0),vA)
         self.enls = enls
         self.inAngle = ang
+        a1,a2 = vA
+        b1,b2 = vB
+        self.reciprocalVectors = cRecip((a1,a2,0.0),(b1,b2,0.0),(0.0,0.0,detachment))
         
         for a in atms:
             a.clasifica(lols)
