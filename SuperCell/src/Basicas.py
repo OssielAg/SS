@@ -51,6 +51,42 @@ def cRot(v):
     '''Calcula el ángulo de un vector con respecto al eje x'''
     return cAng((1,0),v)
 
+def vTm(v1,v2):
+    '''
+    Transforma dos vectores de dimencion 2 a una matríz de 2x2
+    '''
+    (a1,a2), (b1,b2) = v1, v2
+    return [[a1,b1],[a2,b2]]
+
+def mTv(m):
+    '''
+    Transforma una Matríz de 2x2 a un par de vectores de 2 dimenciones
+    '''
+    [[a1,b1],[a2,b2]] = m
+    return (a1,a2), (b1,b2)
+    
+def det(t):
+    '''
+    Calcula el determinante de una matriz t de 2x2
+    '''
+    return (t[0][0]*t[1][1])-(t[0][1]*t[1][0])
+
+def inv2x2(m):
+    '''
+    Calcula la matriz inversa de una matriz de 2x2
+    '''
+    [[a,b],[c,d]] = m
+    de = det(m)
+    return [[d/de, -b/de], [-c/de, a/de]]
+
+def m2M(m1,m2):
+    '''
+    Regresa la Matriz resultante de multiplica las 2 matrices de 2x2 m1 y m2
+    '''
+    [[a,b],[c,d]] = m1
+    [[x,y],[z,w]] = m2
+    return [[(a*x+b*z),(a*y+b*w)],[(c*x+d*z),(c*y+d*w)]]
+
 def getLim(u,v,m,n):
     '''Calcula los valores mínimo y máximo en "x" y "y" del rombo formado por m*u y n*v'''
     (a1,a2) = multV(m,u)

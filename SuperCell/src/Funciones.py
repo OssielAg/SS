@@ -1,4 +1,5 @@
 from .Lattice import *
+from .analyzer import *
 
 # Metodos derivados
 
@@ -78,45 +79,6 @@ def superMesh(sa,sb,loLs):
         i = i + m.detachment
     sR.name = newName
     return sR
-
-def hexa6(p,atms=['C','C'],name=''):
-    '''Crea una Red exagonal s6 con constante de red P'''
-    u,v=(p,0.0),(-p/2,math.sqrt(3)*(p/2))
-    p1,p2,p3,p4 = (1/3,2/3),(2/3,1/3),(1/3,-1/3),(4/3,2/3)
-    ats = [Atomo(p1, sig = atms[0]),Atomo(p2, sig = atms[1])]
-    return Red(u,v,atms=ats,name=name,enls=[(p1,p2),(p2,p3),(p2,p4)])
-
-def hexa3(p,atms=['C','C'],name=''):
-    '''Crea una Red exagonal s3 con constante de red P'''
-    u,v=(p,0.0),(-p/2,math.sqrt(3)*(p/2))
-    p1,p2,p3,p4 = (0.0,0.0),(1/3,2/3),(0,1),(1,1)
-    ats = [Atomo(p1, sig = atms[0]),Atomo(p2, sig = atms[1])]
-    return Red(u,v,atms=ats,name=name,enls=[(p1,p2),(p2,p3),(p2,p4)])
-
-def rectMesh(p1,p2,atms='C',name=''):
-    '''Crea una Red cuadrada con constantes de red p1 y p2'''
-    u,v = (p1,0.0),(0.0,p2)
-    p1,p2,p3 = (1/2,1/2),(3/2,1/2),(1/2,3/2)
-    ats = [Atomo(p1,sig = atms)]
-    return Red(u,v,atms=ats,name=name,enls=[(p1,p2),(p1,p3)])
-    
-def grafeno():
-    '''Crea una red de Grafeno con ambos átomos en el centro'''
-    return hexa6(2.44, name='Grafeno')
-    
-def grafeno3():
-    '''Crea una red de Grafeno con un átomo en un extremo'''
-    return hexa3(2.44, name='Grafeno(s3)')
-
-def blackPhospho():
-    m1=rectMesh(3.3061099052,4.552418232)
-    m1.name='Black-Phosphorene'
-    p1,p2=(0.000000000,0.913483083),(0.500000000,0.579813302)
-    p3,p4=(0.000000000,0.079836130),(0.500000000,0.413437814)
-    ats = [Atomo(p1,sig='P',posZ=0.266835123),Atomo(p2,sig='P',posZ=0.266945183),Atomo(p3,sig='P',posZ=0.181006327),Atomo(p4,sig='P',posZ=0.181094214)]
-    m1.atms[0] = ats
-    #m1.showNM(1,1)
-    return m1
 
 def limpia(loa):
     '''Quita atomos repetidos de una lista de atomos'''
@@ -270,101 +232,7 @@ def calculaPares(r1, r2, th = 0.0, maxIt=15, eps=0.1, show=False):
         if show: print("----------\n{:.3f}°:{}\n\tdelta1={}\n\tdelta2={}\n----------".format(th,(minE1+minE2)/2,minE1,minE2))
     return res, ((minE1+minE2)/2)
 
-def calculaEM(r1, r2, th = 0.0, maxIt=15):
-    '''
-    Calcula los pares enteros (a,b) y (c,d) con a y b <maxIt tales que si u,v son los vectores generadores de 'r1' y rp,rq los
-    vectores generadores de 'r2' rotada en 'th' grados, entonces P1 = (au + bv) y P2 = (c(rp) + d(rq)) son cercanos.
-    
-    Regresa tambien el promedio de los las diferencias mínimas en los cuadrantes I y IV del plano cartesiano que cumplen lo anterior.
-    
-    *Es una función auxiliar de la función 'explora'
-    '''
-    (u,v), (p,q) = r1.getVectors(), r2.getOV()
-    (u_1,u_2), (v_1,v_2) = u, v
-    (p_1,p_2), (q_1,q_2) = rp, rq = rota(p,th), rota(q,th)
-    rango = maxIt
-    minE1 = 100
-    minE2 = 100
-    eq0 = (p_2*q_1)-(p_1*q_2)
-    eq1 = (q_1*u_2)-(q_2*u_1)
-    eq2 = (q_1*v_2)-(q_2*v_1)
-    eq3 = (p_2*u_1)-(p_1*u_2)
-    eq4 = (p_2*v_1)-(p_1*v_2)
-    for k in range(1,(2*rango)+1):
-        for i in range(k+1):
-            j = k-i
-            if(i<(rango+1) and j<(rango+1)):
-                # Buscando en b+
-                a,b = i,-j
-                c = ((eq1*a)+(eq2*b))/(eq0)
-                d = ((eq3*a)+(eq4*b))/(eq0)
-                # Vector esperado
-                r1 = m2V(u,v,(a,b))
-                #Vector aproximado
-                r2 = m2V(rp,rq,(round(c),round(d)))
-                err = dist(r1,r2)
-                if err < minE1:
-                    minE1 = err
-                # Buscando en b-
-                if j!=0:
-                    a,b = i,j
-                    c = ((eq1*a)+(eq2*b))/(eq0)
-                    d = ((eq3*a)+(eq4*b))/(eq0)
-                    # Vector esperado
-                    r1 = sumaV(multV(a,u),multV(b,v))
-                    #Vector aproximado
-                    r2 = sumaV(multV(round(c),rp),multV(round(d),rq))
-                    err = dist(r1,r2)
-                    if err < minE2:
-                        minE2 = err
-    return ((minE1+minE2)/2)
-
-def explora(r1, r2, mIt=15, eMax=0.5, thI=0.0, thF=180.0, acc=1):
-    '''
-    Hace una exploracion para angulos entre 'thI' y 'thF' en un intervalo de 10^(-'acc') grados para obtener
-    una estimación del error minimo para pares de enteros menores a 'mIt' del sistema de coordenadas con base
-    en los vectores generadores de 'r1' y sus contrapartes enteras en el sistema de coordenadas con base en
-    los vectores generadores de 'r2'.
-    '''
-    graf = []
-    i = round(thI*(10**acc))
-    f = round(thF*(10**acc))
-    print("Analizando para theta en intervalo [{}°,{}°]".format(i/(10**acc),f/(10**acc)))
-    print(".............")
-    for t in range(i,f+1):
-        theta = t/(10**acc)
-        b = "Analizando...Theta = "+str(theta)+"°"
-        print(b,end="\r")
-        m = calculaEM(r1, r2, th = theta, maxIt=mIt)
-        if m < eMax:
-            graf.append([theta,m])
-    print(end="\r")
-    print('**********Exploración finalizada**********')
-    return np.array(graf)
-   
-def analiza(r1,r2,roAng=(0.0,180.0),erMax=0.005,mor=15,accuracy=2):
-    '''
-    Ejecuta la función 'explora' para las redes 'r1' y 'r2' para thetas en el intervalo 'roAng' con un mIt igual a 'mor'
-    y un acc igual a accuracy.
-    Analiza los resultados imprimiendo una gráfica de la relación Theta vs error_minimo_aproximado y regresa una lista
-    con los ángulos cuyo error_mínimo_aproximado es menor a 'erMax'.
-    Tambien regresa la lista resultante de la función 'explora'
-    '''
-    (i,f) = roAng
-    graf = explora(r1, r2, mIt=mor, thI=i, thF=f, acc=accuracy)
-    xs, ys = graf[:,0], graf[:,1]
-    plt.plot(xs, ys)
-    plt.show()
-    resultados=[]
-    analisis=np.r_[True, ys[1:] < ys[:-1]] & np.r_[ys[:-1:] < ys[1:], True]
-    print("**********\nLos ángulos con los errores mínimos son:")
-    for i in range(len(analisis)):
-        if analisis[i]==True:
-            if(ys[i]<erMax):
-                resultados.append([xs[i],ys[i]])
-                print("\t{:.3f} : {:.5f}".format(xs[i],ys[i]))
-    return resultados,graf
-
+#-------------------------Funciones Auxiliares para la función "Importa(File)"------------------------
 def readFile(name):
     '''
     Lee el Archivo señalado y lo transforma en un arreglo de Strings de cada una de sus líneas
@@ -388,10 +256,10 @@ def leeNumeros(linea):
     s = []
     s = [float(l) for l in re.findall(r'-?\d+\.?\d*', linea)]
     return s
-    
+#----------------------------------------------------------------------------    
 def importa(name):
     '''
-    Importa un archivo vasp y lo transforma en una Red
+    Importa un archivo vasp señalado por 'name' y lo transforma en una Red
     '''
     errormsg = '''El archivo no tiene el formato soportado por el programa.
 Observe las caracteristicas soportadas escribiendo <importa?>'''
@@ -434,3 +302,61 @@ Observe las caracteristicas soportadas escribiendo <importa?>'''
         print(errormsg)
     except SyntaxError:
         print(errormsg)
+        
+#----------------------Redes prediseñadas------------------------------
+def ejemplos():
+    texto ='''Se cuenta con redes predefinidas, estas son:
+hexa6(p,atms,name) -> Genera una Red hexagonal con constante de red 'p' y con los atomos de la lista atms.
+    Si atms no se dá, entonces tendrá 2 átomos dentro de su base, generando una red hexagonal con 6 simetrias radiales.
+
+hexa3(p,atms,name) -> Genera una Red hexagonal con constante de red 'p' y con los atomos de la lista atms.
+    Si esta no se da entonces tendrá 2 átomos, uno dentro de su base y otro en un vertice, generando una red hexagonal con 3 simetrias radiales.
+
+rectMesh(p1,p2,atms,name) -> Genera una Red rectangular con las constantes de red p1, p2 y los átomos señalados en la lista atms.
+    Si esta no se dá, se generará con un solo átomo en el centro de su base.
+
+grafeno() -> Genera una red de Grafeno, con constante de red 2.44 A y con sus átomos acomodados en el formato de hexa6
+
+grafeno() -> Genera una red de Grafeno, con constante de red 2.44 A y con sus átomos acomodados en el formato de hexa3
+
+blackPhospho() -> Genera una Red de Fosforeno Negro con las constantes de red 3.3061099052 y 4.552418232.'''
+    print(texto)
+    
+def hexa6(p,atms=['C','C'],name=''):
+    '''Genera una Red hexagonal con constante de red 'p' y con los atomos de la lista atms, si esta no se da entonces tendrá 2 átomos dentro de su base, generando una red hexagonal con 6 simetrias radiales.'''
+    u,v=(p,0.0),(-p/2,math.sqrt(3)*(p/2))
+    p1,p2,p3,p4 = (1/3,2/3),(2/3,1/3),(1/3,-1/3),(4/3,2/3)
+    ats = [Atomo(p1, sig = atms[0]),Atomo(p2, sig = atms[1])]
+    return Red(u,v,atms=ats,name=name,enls=[(p1,p2),(p2,p3),(p2,p4)])
+
+def hexa3(p,atms=['C','C'],name=''):
+    '''Genera una Red hexagonal con constante de red 'p' y con los atomos de la lista atms, si esta no se da entonces tendrá 2 átomos, uno dentro de su base y otro en un vertice, generando una red hexagonal con 3 simetrias radiales.'''
+    u,v=(p,0.0),(-p/2,math.sqrt(3)*(p/2))
+    p1,p2,p3,p4 = (0.0,0.0),(1/3,2/3),(0,1),(1,1)
+    ats = [Atomo(p1, sig = atms[0]),Atomo(p2, sig = atms[1])]
+    return Red(u,v,atms=ats,name=name,enls=[(p1,p2),(p2,p3),(p2,p4)])
+
+def rectMesh(p1,p2,atms='C',name=''):
+    '''Genera una Red rectangular con las constantes de red p1, p2 y los átomos señalados en la lista atms, si esta no se dá, se generará con un solo átomo en el centro de su base.'''
+    u,v = (p1,0.0),(0.0,p2)
+    p1,p2,p3 = (1/2,1/2),(3/2,1/2),(1/2,3/2)
+    ats = [Atomo(p1,sig = atms)]
+    return Red(u,v,atms=ats,name=name,enls=[(p1,p2),(p1,p3)])
+    
+def grafeno():
+    '''Genera una red de Grafeno, con constante de red 2.44 A y con sus átomos dentro de su base, generando una red hexagonal con 6 simetrias radiales.'''
+    return hexa6(2.44, name='Grafeno')
+    
+def grafeno3():
+    '''Genera una red de Grafeno, con constante de red 2.44 A y con uno de sus átomos dentro de su base y otro en un vertice, generando una red hexagonal con 3 simetrias radiales.'''
+    return hexa3(2.44, name='Grafeno(s3)')
+
+def blackPhospho():
+    '''Genera una Red de Fosforeno Negro con las constantes de red 3.3061099052 y 4.552418232.'''
+    m1=rectMesh(3.3061099052,4.552418232)
+    m1.name='Black-Phosphorene'
+    p1,p2=(0.000000000,0.913483083),(0.500000000,0.579813302)
+    p3,p4=(0.000000000,0.079836130),(0.500000000,0.413437814)
+    ats = [Atomo(p1,sig='P',posZ=0.266835123),Atomo(p2,sig='P',posZ=0.266945183),Atomo(p3,sig='P',posZ=0.181006327),Atomo(p4,sig='P',posZ=0.181094214)]
+    m1.atms[0] = ats
+    return m1

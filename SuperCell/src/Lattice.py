@@ -238,3 +238,12 @@ class Red:
         Regresa los Vectores generadores sin rotación de la Red
         '''
         return (self.OriginalA, self.OriginalB)
+    
+    def nOAtms(self):
+        '''
+        Regresa el número de átomos que tiene la red
+        '''
+        noa = 0
+        for loa in self.atms:
+            noa = noa + len(loa)
+        return noa
