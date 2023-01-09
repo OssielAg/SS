@@ -5,8 +5,8 @@ from prettytable import PrettyTable
 
 def calculaEM(r1, r2, th = 0.0, maxIt=15):
     '''
-    Calcula los pares enteros (a,b) y (c,d) con a y b <maxIt tales que si u,v son los vectores generadores de 'r1' y rp,rq los
-    vectores generadores de 'r2' rotada en 'th' grados, entonces P1 = (au + bv) y P2 = (c(rp) + d(rq)) son cercanos.
+    Calcula los pares enteros (a,b) y (c,d) con a y b < maxIt tales que, si: u,v son los vectores primitivos de 'r1' y rp,rq los
+    vectores primitivos de 'r2' rotada en 'th' grados; entonces: P1 = (au + bv), P2 = (c(rp) + d(rq)) son cercanos.
     
     Regresa tambien el promedio de los las diferencias mínimas en los cuadrantes I y IV del plano cartesiano que cumplen lo anterior.
     '''
