@@ -96,7 +96,54 @@ def analiza(r1,r2,roAng=(0.0,180.0),erMax=0.005,mor=15,accuracy=2):
                 print("\t{:.3f} : {:.5f}".format(xs[i],ys[i]))
     return resultados,graf
 
-#-----------------Funciones Auxiliares para la muestra del analisis.-----------------
+def muestra(lor,r1,r2):
+    '''
+    Muestra una tabla con las caracteristicas de los mejores resultados para las trasnformaciones requeridas para la super Red que describa el sistema r2 sobre r1.
+    lor -> Lista de resultados obtenidos de la funciòn 'analiza'
+    r1  -> Red1
+    r2  -> Red2
+    '''
+    leyend = "Mejores candidatos para Super-Red:'R1={}',R2='{}'\n".format(r1.name,r2.name)
+    print(leyend)
+    if round(r1.inAngle,3)==120.000 and round(r1.inAngle,3)==120.000:
+        table = PrettyTable(["# de Atms","T1","T2","Tención/Rotación Red1","Tención/Rotación Red2", "Err"])
+        for c in lor:
+            noa = r1.nOAtms()*det(dameTH(c[0]))+r2.nOAtms()*det(dameTH(c[1]))
+            sa,sb = mTv(m2M(vTm(r1.a,r1.b),dameTH(c[0])))
+            md1,md2=ajusta(r1,r2,dameTH(c[0]),dameTH(c[1]),sa,sb)
+            text1 = describeAjuste(r1,md1)
+            text2 = describeAjuste(r2,md2)
+            table.add_row([noa,
+                           mtoStr(dameTH(c[0])),
+                           mtoStr(dameTH(c[1])),
+                           text1,
+                           text2,
+                           str(round(c[3],10))])
+        print(table)
+        return 1
+    return 0
+
+def ajusta(r1,r2,t1,t2,p1,p2):
+    '''
+    Calcula el ajuste requerido en los vectores primitivos de las redes dadas para que al transformarlos con su respectiva matriz 't' coincida con las posiciones p1 y p2 esperadas.
+    r1 -> Red1
+    r2 -> Red2
+    t1 -> Transformación para Red1
+    t2 -> Transformaciòn para Red2
+    p1 -> Vector A de la super red que corresponde a Red2 sobre Red1
+    p2 -> Vector B de la super red que corresponde a Red2 sobre Red1
+    '''
+    mr1i = inv2x2(vTm(r1.a,r1.b))
+    mr2i = inv2x2(vTm(r2.a,r2.b))
+    mres = vTm(p1,p2)
+    mt1i = inv2x2(t1)
+    mt2i = inv2x2(t2)
+    md1 = m2M(mr1i,m2M(mres,mt1i))
+    md2 = m2M(mr2i,m2M(mres,mt2i))
+    return md1, md2  
+
+
+#-----------------Funciones Auxiliares para la funciòn 'muestra'.-----------------
 def strS(i,n=3):
     '''
     Combierte i en un string de al menos tamaño n rellenando con espacios en blanco
@@ -127,7 +174,7 @@ def mtoStr(t):
 
 def top(lor, n=5):
     '''
-    Recibe la lista de resultados arrojada por la función 'analiza' y toma los 'n' resultados con el menor valor de error.
+    Recibe la lista de resultados arrojada por la función 'calculaPares' y regresa una lista con los 'n' resultados con el menor valor de error.
     '''
     try:
         if len(lor[0][0])<n:
@@ -139,20 +186,8 @@ def top(lor, n=5):
         print("La lista dada no proviene de la operación 'calculaPares'")
     return lo
 
-def ajusta(r1,r2,t1,t2,p1,p2):
-    '''
-    Calcula el ajuste requerido en los vectores primitivos de las redes dadas para que,
-    al transformarlos con su respectiva matriz 't' coincida con las posiciones p1 y p2 dadas.
-    '''
-    mr1i = inv2x2(vTm(r1.a,r1.b))
-    mr2i = inv2x2(vTm(r2.a,r2.b))
-    mres = vTm(p1,p2)
-    mt1i = inv2x2(t1)
-    mt2i = inv2x2(t2)
-    md1 = m2M(mr1i,m2M(mres,mt1i))
-    md2 = m2M(mr2i,m2M(mres,mt2i))
-    return md1, md2  
- 
+
+#--------------------Funciones Auxiliares para 'ajuste'--------------------
 def leeAjuste(red,ajuste):
     ajA,ajB = mTv(m2M(vTm(red.a,red.b),ajuste))
     ajA1,ajB1 = ((long(ajA)/long(red.a))*100)-100, ((long(ajB)/long(red.b))*100)-100
@@ -172,21 +207,3 @@ def describeAjuste(red,ajuste):
         text=text+"\n({}°, {}°)".format(round(rA,5),round(rB,5))
     return text
 
-def muestra(lor,r1,r2):
-    leyend = "Mejores candidatos para Super-Red:'R1={}',R2='{}'\n".format(r1.name,r2.name)
-    print(leyend)
-    if round(r1.inAngle,3)==120.000 and round(r1.inAngle,3)==120.000:
-        table = PrettyTable(["# de Atms","T1","T2","Tención/Rotación Red1","Tención/Rotación Red2", "Err"])
-        for c in lor:
-            noa = r1.nOAtms()*det(dameTH(c[0]))+r2.nOAtms()*det(dameTH(c[1]))
-            sa,sb = mTv(m2M(vTm(r1.a,r1.b),dameTH(c[0])))
-            md1,md2=ajusta(r1,r2,dameTH(c[0]),dameTH(c[1]),sa,sb)
-            text1 = describeAjuste(r1,md1)
-            text2 = describeAjuste(r2,md2)
-            table.add_row([noa,
-                           mtoStr(dameTH(c[0])),
-                           mtoStr(dameTH(c[1])),
-                           text1,
-                           text2,
-                           str(round(c[3],10))])
-        print(table)
