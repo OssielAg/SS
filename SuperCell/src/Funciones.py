@@ -196,7 +196,9 @@ def calculaPares(r1, r2, th = 0.0, maxIt=15, eps=0.1, show=False):
                 #Vector aproximado
                 r2 = m2V(rp,rq,(round(c),round(d)))
                 # Calcula la proporción entre el tamaño del vector esperado y el aproximado
-                delta = long(r1)/long(r2)
+                div=long(r2)
+                if div==0: div=10**(-5)
+                delta = long(r1)/div
                 err = dist(r1,r2)#/(long(r2)*f)
                 #print("-({},{}),({},{}):Err={}".format(a,b,round(c),round(d),err))
                 if err < minE1:
