@@ -289,7 +289,7 @@ Observe las caracteristicas soportadas escribiendo <importa?>'''
         atomos = []
         ind = 8
         for i in range(len(aTipos)):
-            col = black#["#"+''.join([random.choice('ABCDEF0123456789') for i in range(6)])]
+            col = 'black' #["#"+''.join([random.choice('ABCDEF0123456789') for i in range(6)])]
             for j in range(round(aCant[i])):
                 pA = leeNumeros(lines[ind+j])
                 at = Atomo((pA[0], pA[1]), posZ=pA[2], color=col, sig=aTipos[i])
