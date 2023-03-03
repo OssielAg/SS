@@ -106,10 +106,10 @@ class Red:
         xs, ys = lis[:,0], lis[:,1]
         #Dibuja los Atomos
         maxs.scatter(xs,ys, color=col,s=t)
-        #Cargamos los enlaces en una lista de lineas
-        lc = mc.LineCollection(np.array(enls), colors='silver', linewidths=(t/10))
         #Cargamos los contornos de las celdas en una lista de lineas
-        lr = mc.LineCollection(np.array(red), colors='gray', linewidths=(t/15))
+        lr = mc.LineCollection(np.array(red), colors='silver', linewidths=(t/20))
+        #Cargamos los enlaces en una lista de lineas
+        lc = mc.LineCollection(np.array(enls), colors='black', linewidths=(t/10))
         #Dibuja los Enlaces
         maxs.add_collection(lc)
         #Dibuja los contornos de las celdas
