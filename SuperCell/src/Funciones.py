@@ -172,7 +172,7 @@ def calculaPares(r1, r2, th = 0.0, maxIt=15, eps=0.1, show=False):
     (p_1,p_2), (q_1,q_2) = rp, rq = rota(p,th), rota(q,th)
     if th==0.0:
         th=r2.theta
-    res = [[],[]]
+    res = []
     f = 1/2 # Factor de importancia de el tamaño del vector resultante
     rango = maxIt
     delta = 0.0
@@ -206,7 +206,7 @@ def calculaPares(r1, r2, th = 0.0, maxIt=15, eps=0.1, show=False):
                 if (err < eps):
                     #print(1-delta)
                     if(abs(1-delta) < 0.07):
-                        res[0].append([[a,b],[round(c),round(d)],delta,err])
+                        res.append([[a,b],[round(c),round(d)],delta,err])
                         if show:
                             print(">{:.3f}°:({},{})-({},{}): Delta={}%".format(th,a,b,round(c),round(d),delta*100),":",dist(r1,r2))
                 # Buscando en b-
@@ -227,7 +227,7 @@ def calculaPares(r1, r2, th = 0.0, maxIt=15, eps=0.1, show=False):
                         minE2 = err
                     if (err < eps):
                         if(abs(1-delta)<0.07):
-                            res[1].append([[a,b],[round(c),round(d)],delta,err])
+                            res.append([[a,b],[round(c),round(d)],delta,err])
                             if show:
                                 print(">>{:.3f}°:({},{})-({},{}): Delta={}%".format(th,a,b,round(c),round(d),delta*100),":",dist(r1,r2))
     if (minE1+minE2)/2 < 0.5:

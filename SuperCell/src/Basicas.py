@@ -45,7 +45,8 @@ def long(v):
 def cAng(u,v):
     '''Calcula el ángulo interno entre 2 vectores'''
     (u1,u2),(v1,v2) = u, v
-    return math.degrees(math.acos(((u1*v1)+(u2*v2))/(dist((0,0),u)*dist((0,0),v))))
+    x = round(((u1*v1)+(u2*v2))/(dist((0,0),u)*dist((0,0),v)),5)
+    return math.degrees(math.acos(x))
 
 def cRot(v):
     '''Calcula el ángulo de un vector con respecto al eje x'''
@@ -136,3 +137,22 @@ def cRecip(a,b,c):
     (x,y,z) = pC(a,b)
     w = (x*e, y*e, z*e)
     return [u,v,w]
+
+def esRotacion(a,b,c,d,eps=0.001):
+    '''
+    Determina si el par de vectores a,b es una rotación del par de vectores c,d
+    '''
+    if abs(cAng(a,c)-cAng(b,d))<eps:
+        return True
+    if abs(cAng(a,d)-cAng(b,c))<eps:
+        return True
+    return False
+    
+def transforma2v(u,v,M):
+    '''
+    Obtiene los vectores ut y vt a partir de transformar u y v con una Matríz M 
+    '''
+    mv = vTm(u,v)
+    m = m2M(mv,M)
+    ut, vt = mTv(m)
+    return ut, vt
