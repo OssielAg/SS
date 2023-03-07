@@ -34,6 +34,7 @@ class Red:
         self.theta = cAng((1,0),vA)
         self.enls = enls
         self.inAngle = ang
+        self.layerList = []
         a1,a2 = vA
         b1,b2 = vB
         self.reciprocalVectors = cRecip((a1,a2,0.0),(b1,b2,0.0),(0.0,0.0,detachment))
@@ -250,3 +251,35 @@ class Red:
         for loa in self.atms:
             noa = noa + len(loa)
         return noa
+
+    def printReciprocalSpace(self, t=10, border=1.0):
+        '''
+        Imprime en pantalla la FBZ de la red en el espacio reciproco, si esta red pertenece a un sistema multicapa
+        imprime tambien la FBZ de cada capa.
+        t      -> Valor con el que se determinarán los tamaños con el que se dibujarán puntos y líneas.
+        border -> Límites de la gráfica dibujada.
+        '''
+        lol = self.layerList
+        print("Calculando...")
+        ax = plt.subplot()
+        #"Pintamos" la FBZ de cada capa que forma la red si es que es un sistema multicapa
+        if len(lol) > 0:
+            colors=['#'+''.join([random.choice('3456789') for i in range(6)]) for j in range(len(lol))]
+            for i in range(len(lol)):
+                vl, eq = calcVerticesFBZ(to2D(lol[i].reciprocalVectors[0]),to2D(lol[i].reciprocalVectors[1]))
+                fbzLayer = Polygon(vl, alpha=0.4, color = colors[i], label = lol[i].name)
+                ax.add_patch(fbzLayer)
+                print("...Pintando capa {} ({})".format(i+1,lol[i].name))
+        #"Pntamos" la FBZ de la red y el fondo dado por la función 'reciprocalBackgroundMesh'
+        vl, eq = calcVerticesFBZ(to2D(self.reciprocalVectors[0]),to2D(self.reciprocalVectors[1]))
+        xs, ys, linkList = reciprocalBackgroundMesh(self,vl,t)
+        fbzRed = Polygon(vl, alpha=0.7, color = 'gray', label = self.name)
+        ax.add_patch(fbzRed)
+
+        ax.add_collection(linkList)#"Pintamos" los enlaces de la red de fondo calculado previamente
+        ax.scatter(xs,ys, color='black',s=t)#"Pintamos" los Puntos de la red reciproca calculados previamente 
+        ax.set(xlim=(-border,border), ylim=(-border,border))
+        ax.legend(loc = 'upper right')
+        print("...Terminado")
+        plt.show()
+        return 1

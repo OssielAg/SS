@@ -61,28 +61,38 @@ def megeCut(mo, sm, lvl=0):
             isitin(mo,(a,b),sm,lvl)
     return 1
 
-def superMesh(sa,sb,loLs):
-    '''Crea una SuperMalla en bace a una lista de Redes "loLs" con los vectores sa y sb'''
+def superMesh(sa,sb,layerList):
+    '''
+    Crea una Super Red en bace a una lista de Redes "layerList" con los vectores primitivos sa y sb
+    sa        -> Vector primitivo 'a' de la Super Red 
+    sb        -> Vector primitivo 'b' de la Super Red
+    layerList -> Lista de capas que forman el sistema al que identifica la Super Red
+    '''
     sR = Red(sa,sb)
     sR.enls = []
     detachment = 0
-    for l in loLs:
+    for l in layerList:
         detachment = detachment + l.detachment
     sR.detachment = detachment
     sR.prof=0
     newName="SuperLattice"
     i=0
-    for m in loLs:
+    for m in layerList:
         megeCut(m, sR, lvl=i)
         sR.prof=sR.prof+m.prof
         newName=newName+" ["+m.name+"]"
         i = i + m.detachment
     sR.name = newName
+    sR.layerList = layerList
     return sR
 
-def limpia(loa):
-    '''Quita atomos repetidos de una lista de atomos'''
-    err=1/(10**8)
+def limpia(loa, acc=8):
+    '''
+    Quita atomos repetidos de una lista de atomos
+    loa -> Lista de átomos que limpiaremos
+    acc -> Exactitud con la que trabajaremos
+    '''
+    err=1/(10**acc)
     res = []
     for i in range(len(loa)):
         pasa=True
@@ -105,7 +115,9 @@ def limpia(loa):
     return res
 
 def transfVs(u,v,t):
-    '''Transforma los vectores u y v al multiplicar la matriz [[u1,v1],[u2,v2]] por la matriz [[t1,t2],[t3,t4]]'''
+    '''
+    Transforma los vectores u y v al multiplicar la matriz [[u1,v1],[u2,v2]] por la matriz [[t1,t2],[t3,t4]]
+    '''
     m,n,p,q = t
     return m2V(u,v,(m,p)), m2V(u,v,(n,q))
 
@@ -289,7 +301,7 @@ Observe las caracteristicas soportadas escribiendo <importa?>'''
         atomos = []
         ind = 8
         for i in range(len(aTipos)):
-            col = 'black' #["#"+''.join([random.choice('ABCDEF0123456789') for i in range(6)])]
+            col = '#'+''.join([random.choice('123456789ABCD') for i in range(6)])
             for j in range(round(aCant[i])):
                 pA = leeNumeros(lines[ind+j])
                 at = Atomo((pA[0], pA[1]), posZ=pA[2], color=col, sig=aTipos[i])
@@ -304,7 +316,8 @@ Observe las caracteristicas soportadas escribiendo <importa?>'''
         print(errormsg)
     except SyntaxError:
         print(errormsg)
-        
+
+
 #----------------------Redes prediseñadas------------------------------
 def ejemplos():
     texto ='''Se cuenta con redes predefinidas, estas son:
