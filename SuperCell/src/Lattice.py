@@ -266,12 +266,12 @@ class Red:
         if len(lol) > 0:
             colors=['#'+''.join([random.choice('3456789') for i in range(6)]) for j in range(len(lol))]
             for i in range(len(lol)):
-                vl, eq = calcVerticesFBZ(to2D(lol[i].reciprocalVectors[0]),to2D(lol[i].reciprocalVectors[1]))
+                vl, eq = calcVerticesFBZ(lol[i])
                 fbzLayer = Polygon(vl, alpha=0.4, color = colors[i], label = lol[i].name)
                 ax.add_patch(fbzLayer)
                 print("...Pintando capa {} ({})".format(i+1,lol[i].name))
         #"Pntamos" la FBZ de la red y el fondo dado por la función 'reciprocalBackgroundMesh'
-        vl, eq = calcVerticesFBZ(to2D(self.reciprocalVectors[0]),to2D(self.reciprocalVectors[1]))
+        vl, eq = calcVerticesFBZ(self)
         xs, ys, linkList = reciprocalBackgroundMesh(self,vl,t)
         fbzRed = Polygon(vl, alpha=0.7, color = 'gray', label = self.name)
         ax.add_patch(fbzRed)

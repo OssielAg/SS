@@ -8,7 +8,7 @@ def isitin(r,cent, sr, slvl):
     Verifica que átomos pertenecientes a una celda de la Red "r" con centro en "cen" se encuentran en la celda principal de la Red "sr".
     Todos los átomos que lo estén se agregan a los átomos de sr
     '''
-    er = 1/(10**4) #Error de calculo aceptable en la frontera de la Celda unitaria de sr
+    er = 1/(10**3) #Error de calculo aceptable en la frontera de la Celda unitaria de sr
     (u1,u2) = r.a
     (v1,v2) = r.b
     (p1,p2) = sr.a
@@ -35,9 +35,9 @@ def isitin(r,cent, sr, slvl):
         (x1,y1) = sumaV(cent,e[0])
         (x2,y2) = sumaV(cent,e[1])
         (ox,oy) = ((eq1*x1+eq2*y1)/eq0,(eq3*x1+eq4*y1)/eq0)
-        f = ((eq1*x2+eq2*y2)/eq0,(eq3*x2+eq4*y2)/eq0)
-        if (ox<1 and ox>0) and (oy<1 and oy>0):
-            sr.enls.append([(ox,oy),f])
+        (fx,fy) = ((eq1*x2+eq2*y2)/eq0,(eq3*x2+eq4*y2)/eq0)
+        if (ox<1+er and ox>0-er) and (oy<1+er and oy>0-er):
+            sr.enls.append([(ox,oy),(fx,fy)])
     return 1
 
 def megeCut(mo, sm, lvl=0):
@@ -121,7 +121,7 @@ def transfVs(u,v,t):
     m,n,p,q = t
     return m2V(u,v,(m,p)), m2V(u,v,(n,q))
 
-def buscaSVect(vectU,vectV, th, rango=15, limDelta=0.1, show=True):
+def buscaSVects(vectU,vectV, th, rango=15, limDelta=0.1, show=True):
     lim = limDelta
     f1, f2 = 0, 0
     res = [[],[]]
@@ -368,10 +368,13 @@ def grafeno3():
 
 def blackPhospho():
     '''Genera una Red de Fosforeno Negro con las constantes de red 3.3061099052 y 4.552418232.'''
-    m1=rectMesh(3.3061099052,4.552418232)
-    m1.name='Black-Phosphorene'
+    #m1=rectMesh(3.3061099052,4.552418232)
+    a,b=(3.3061099052,0.0), (0.0,4.552418232)
+    #m1.name='Black-Phosphorene'
     p1,p2=(0.000000000,0.913483083),(0.500000000,0.579813302)
     p3,p4=(0.000000000,0.079836130),(0.500000000,0.413437814)
     ats = [Atomo(p1,sig='P',posZ=0.266835123),Atomo(p2,sig='P',posZ=0.266945183),Atomo(p3,sig='P',posZ=0.181006327),Atomo(p4,sig='P',posZ=0.181094214)]
-    m1.atms[0] = ats
-    return m1
+    enl = [(p1,p2),(p3,p4),(p2,p4),(p2,sumaV(p1,(1.0,0.0))),(p4,sumaV(p3,(1.0,0.0))),(p1,sumaV(p3,(0.0,1.0)))]
+    #m1 = Red(a,b,atms=ats,name='Black-Phosphorene',enls=enl)
+    #m1.atms[0] = ats
+    return Red(a,b,atms=ats,name='Black-Phosphorene',enls=enl)

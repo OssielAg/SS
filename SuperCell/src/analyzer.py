@@ -13,9 +13,9 @@ def calculaEM(r1, r2, th = 0.0, maxIt=15):
     (u,v), (p,q) = r1.getVectors(), r2.getOV()
     (u_1,u_2), (v_1,v_2) = u, v
     (p_1,p_2), (q_1,q_2) = rp, rq = rota(p,th), rota(q,th)
+    puntos= []
     rango = maxIt
-    minE1 = 100
-    minE2 = 100
+    minim = 10**9
     eq0 = (p_2*q_1)-(p_1*q_2)
     eq1 = (q_1*u_2)-(q_2*u_1)
     eq2 = (q_1*v_2)-(q_2*v_1)
@@ -34,8 +34,8 @@ def calculaEM(r1, r2, th = 0.0, maxIt=15):
                 #Vector aproximado
                 r2 = m2V(rp,rq,(round(c),round(d)))
                 err = dist(r1,r2)
-                if err < minE1:
-                    minE1 = err
+                if err < 0.6:
+                    puntos = acomoda(r1,err,puntos,2)
                 # Buscando en b-
                 if j!=0:
                     a,b = i,j
@@ -46,9 +46,11 @@ def calculaEM(r1, r2, th = 0.0, maxIt=15):
                     #Vector aproximado
                     r2 = sumaV(multV(round(c),rp),multV(round(d),rq))
                     err = dist(r1,r2)
-                    if err < minE2:
-                        minE2 = err
-    return ((minE1+minE2)/2)
+                    if err < 0.6:
+                        puntos = acomoda(r1,err,puntos,2)
+    if len(puntos)>=2:
+        minim = (puntos[0][1]+puntos[1][1])/2
+    return minim, det(vTm(puntos[0][0],puntos[1][0]))
 
 def explora(r1, r2, mIt=15, eMax=0.5, thI=0.0, thF=180.0, acc=1):
     '''
@@ -66,9 +68,9 @@ def explora(r1, r2, mIt=15, eMax=0.5, thI=0.0, thF=180.0, acc=1):
         theta = t/(10**acc)
         b = "Analizando...Theta = "+str(theta)+"°"
         print(b,end="\r")
-        m = calculaEM(r1, r2, th = theta, maxIt=mIt)
+        m,d = calculaEM(r1, r2, th = theta, maxIt=mIt)
         if m < eMax:
-            graf.append([theta,m])
+            graf.append([theta,m,d])
     print(end="\r")
     print('**********Exploración finalizada**********')
     return np.array(graf)
@@ -83,7 +85,7 @@ def analiza(r1,r2,roAng=(0.0,180.0),erMax=0.005,mor=15,accuracy=2):
     '''
     (i,f) = roAng
     graf = explora(r1, r2, mIt=mor, thI=i, thF=f, acc=accuracy)
-    xs, ys = graf[:,0], graf[:,1]
+    xs, ys, ds = graf[:,0], graf[:,1], graf[:,2]
     plt.plot(xs, ys)
     plt.show()
     resultados=[]
@@ -93,7 +95,7 @@ def analiza(r1,r2,roAng=(0.0,180.0),erMax=0.005,mor=15,accuracy=2):
         if analisis[i]==True:
             if(ys[i]<erMax):
                 resultados.append([xs[i],ys[i]])
-                print("\t{:.3f} : {:.5f}".format(xs[i],ys[i]))
+                print("\t{:.3f} : {:.5f}:det={}".format(xs[i],ys[i],ds[i]))
     return resultados,graf
 
 def muestra(lor,r1,r2):

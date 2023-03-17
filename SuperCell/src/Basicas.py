@@ -10,6 +10,8 @@ plt.rcParams['figure.figsize'] = (10, 10)
 
 '''-------------------------------------------------------------------------------------------------------------'''
 #Funciones Básicas
+
+#--------------------Funciones para Vectores--------------------#
 def sumaV(x,y):
     '''Suma 2 vectores dados'''
     a,b=x
@@ -22,8 +24,8 @@ def multV(n,a):
     return (a1*n,a2*n)
 
 def m2V(n,m,s):
-    '''Multiplica la matriz [n,m] por el vector s regresando la suma de n*s1+m*s2'''
-    a,b=s
+    '''Suma el el vector n multiplicado con el primer elemento del par s con el vector m multiplicado por el segundo elemento del par s'''
+    a,b = s
     return sumaV(multV(a,n),multV(b,m))
 
 def rota(vect, theta):
@@ -53,16 +55,40 @@ def cRot(v):
     '''Calcula el ángulo de un vector con respecto al eje x'''
     return cAng((1,0),v)
 
+def pC(a,b):
+    '''
+    Calcula el producto Cruz de los vectores a y b en R3
+    '''
+    a1,a2,a3 = a
+    b1,b2,b3 = b
+    return ((a2*b3-a3*b2),(a3*b1-a1*b3),(a1*b2-a2*b1))
+
+def pP(a,b):
+    '''
+    Calcula el producto punto de los vectores a y b en R3
+    '''
+    a1,a2,a3 = a
+    b1,b2,b3 = b
+    return a1*b1+a2*b2+a3*b3
+
+def to2D(v):
+    '''
+    Recibe un vector en R3 y regresa su proyección en R2
+    '''
+    x,y,z=v
+    return (x,y)
+    
+#--------------------Funciones para matrices--------------------#
 def vTm(v1,v2):
     '''
-    Transforma dos vectores de dimencion 2 a una matríz de 2x2
+    Transforma dos vectores de dimensión 2 a una matriz de 2x2
     '''
     (a1,a2), (b1,b2) = v1, v2
     return [[a1,b1],[a2,b2]]
 
 def mTv(m):
     '''
-    Transforma una Matríz de 2x2 a un par de vectores de 2 dimenciones
+    Transforma una Matriz de 2x2 a un par de vectores de 2 dimensiones
     '''
     [[a1,b1],[a2,b2]] = m
     return (a1,a2), (b1,b2)
@@ -89,6 +115,7 @@ def m2M(m1,m2):
     [[x,y],[z,w]] = m2
     return [[(a*x+b*z),(a*y+b*w)],[(c*x+d*z),(c*y+d*w)]]
 
+#--------------------Funciones misceláneas--------------------#
 def getLim(u,v,m,n):
     '''Calcula los valores mínimo y máximo en "x" y "y" del rombo formado por m*u y n*v'''
     (a1,a2) = multV(m,u)
@@ -100,29 +127,46 @@ def getLim(u,v,m,n):
     ymi = min(a2,b2,c2,0)
     return [xmi-1, xma+1], [ymi-1, yma+1]
 
-def pC(a,b):
+def esRotacion(a,b,c,d,eps=0.001):
     '''
-    Calcula el producto Crux de los vectores a y b en R3
+    Determina si el par de vectores a,b es una rotación del par de vectores c,d
     '''
-    a1,a2,a3 = a
-    b1,b2,b3 = b
-    return ((a2*b3-a3*b2),(a3*b1-a1*b3),(a1*b2-a2*b1))
+    if abs(cAng(a,c)-cAng(b,d))<eps:
+        return True
+    if abs(cAng(a,d)-cAng(b,c))<eps:
+        return True
+    return False
+    
+def transforma2v(u,v,M):
+    '''
+    Obtiene los vectores ut y vt a partir de transformar u y v con una Matriz M 
+    '''
+    mv = vTm(u,v)
+    m = m2M(mv,M)
+    ut, vt = mTv(m)
+    return ut, vt
 
-def pP(a,b):
+def acomoda(x, valor, es, tamMax):
     '''
-    Calcula el producto punto de los vectores a y b en R3
+    Acomoda un objeto 'x' en la lista ordenada 'es' de acuerdo a su 'valor' respetando que
+    el tamaño de 'es' no sea mayor a tamMax.
+    x     -> Elemento que queremos ingresar a la lista
+    valor -> Valor dado al elemento 'x'
+    es    -> Lista en que trabajamos
+    tamMax-> Tamaño máximo aceptable para 'es'
     '''
-    a1,a2,a3 = a
-    b1,b2,b3 = b
-    return a1*b1+a2*b2+a3*b3
+    if len(es)<tamMax:
+        es.append([x,valor])
+        return es
+    for i in range(len(es)):
+        if valor<es[i][1]:
+            es.insert(i,[x,valor])
+            if len(es)>tamMax:
+                trash=es.pop()
+            return es
+    return es
 
-def to2D(v):
-    '''
-    Recibe un vector en R3 y regresa su proyección en R2
-    '''
-    x,y,z=v
-    return (x,y)
-
+#--------------------Funciones para el espacio reciproco--------------------
 def cRecip(a,b,c):
     '''
     Calcula los vectores de la Red en el espacio reciproco de la red formada por los vectores a,b,c en R3
@@ -139,34 +183,14 @@ def cRecip(a,b,c):
     w = (x*e, y*e, z*e)
     return [u,v,w]
 
-def esRotacion(a,b,c,d,eps=0.001):
-    '''
-    Determina si el par de vectores a,b es una rotación del par de vectores c,d
-    '''
-    if abs(cAng(a,c)-cAng(b,d))<eps:
-        return True
-    if abs(cAng(a,d)-cAng(b,c))<eps:
-        return True
-    return False
-    
-def transforma2v(u,v,M):
-    '''
-    Obtiene los vectores ut y vt a partir de transformar u y v con una Matríz M 
-    '''
-    mv = vTm(u,v)
-    m = m2M(mv,M)
-    ut, vt = mTv(m)
-    return ut, vt
-
-#--------------------Funciones para el espacio reciproco--------------------
 def buscaEsquina(m, j, e1, e2):
     '''
     **Función auxiliar para calVerticesFBZ
     Indica con qué 'fila' de la matriz en que se opera se va a intercambiar.
-    m  -> Matríz en que operamos
+    m  -> Matriz en que operamos
     j  -> Columna que estamos iterando
-    e1 -> Primera dimención de la base actual
-    e2 -> Segunda dimención de la base actual
+    e1 -> Primera dimensión de la base actual
+    e2 -> Segunda dimensión de la base actual
     '''
     ind = -1
     val = (10.0)**300
@@ -181,9 +205,9 @@ def buscaEsquina(m, j, e1, e2):
 
 def opera(m,e,s):
     '''
-    **Función auxiliar para calVerticesFBZ
-    Opera en la matríz para dejar en la columna 'e' tengamos ceros eccepto en m[s][e] donde tenemos 1
-    m -> Matríz que operamos
+    **Función auxiliar para calcVerticesFBZ
+    Opera en la matriz para dejar en la columna 'e' tengamos ceros excepto en m[s][e] donde tenemos 1
+    m -> Matriz que operamos
     e -> Columna de la celda pivote
     s -> Fila de la celda pivote
     '''
@@ -195,8 +219,7 @@ def opera(m,e,s):
 
 def pmat(m):
     '''
-    **Función auxiliar para calVerticesFBZ
-    Imprime en pantalla el estado actual de la matriz m.
+    Imprime en pantalla la matriz m.
     '''
     for i in range(len(m)):
         lin = ""
@@ -205,19 +228,71 @@ def pmat(m):
         print(lin)
     print("")
     
-
-def calcVerticesFBZ(b1, b2):
+def dameVecinos(red):
     '''
-    Calcula la posición de los vertices frontera de la FBZ a partir de los vectores reciprocos a* y b*
+    Regresa los 8 puntos de red del espacio reciproco de 'red' más cercanos al origen 
+    '''
+    b1, b2 = to2D(red.reciprocalVectors[0]), to2D(red.reciprocalVectors[1])
+    d1 = long(m2V(b1,b2,(1,1)))
+    d2 = long(m2V(b1,b2,(-1,1)))
+    if d1<d2:
+        n = round(d2/d1)
+    else:
+        n = round(d1/d2)
+    vec = []
+    for i in range(-(2*n),(2*n)+1):
+        for j in range(-(2*n),(2*n)+1):
+            if (i,j)!=(0,0):
+                v = m2V(b1,b2,(i,j))
+                vec.append([v,long(v),(i,j)])
+    vec=sorted(vec, key=lambda op : op[1])
+    vecinos=[]
+    vC=[]
+    ind=0
+    while len(vecinos)<8 and ind<len(vec):
+        if califica(vec[ind][2],vC):
+            #vecinos.append([vec[ind][0],vec[ind][1],vec[ind][2]])
+            vecinos.append(vec[ind][0])
+            vC.append(vec[ind][2])
+        ind+=1
+    return vecinos
+
+def califica(pos, lista):
+    '''
+    Califica de forma booleana si una posición 'pos' dada es vista desde el origen sin ser tapada por las posiciones
+    guardadas en la lista dada.
+    '''
+    for i in range(len(lista)):
+        (px,py) = pos
+        (lx,ly) = lista[i]
+        if px!=0:
+            k=lx/px
+            if k>0:
+                if ly==k*py:
+                    #print("({},{}) es tapado por ({},{})".format(px,py,lx,ly))
+                    return False
+        elif py!=0:
+            k=ly/py
+            if k>0:
+                if lx==k*px:
+                    #print("({},{}) es {} veces ({},{})".format(px,py,k,lx,ly))
+                    return False
+    return True
+    
+def calcVerticesFBZ(l):
+    '''
+    Calcula la posición de los vértices frontera de la FBZ a partir de los vectores recíprocos a* y b*
     proyectados en el plano XY.
     b1 -> Vector reciproco a* de la red
     b2 -> Vector reciproco b* de la red
     '''
+    #b1,b2 = to2D(l.reciprocalVectors[0]), to2D(l.reciprocalVectors[1])
     pts = []
-    vecinos=[m2V(b1,b2,( 1, 0)),m2V(b1,b2,( 1, 1)),
+    vecinos=dameVecinos(l)
+    '''[m2V(b1,b2,( 1, 0)),m2V(b1,b2,( 1, 1)),
              m2V(b1,b2,( 0, 1)),m2V(b1,b2,(-1, 1)),
              m2V(b1,b2,(-1, 0)),m2V(b1,b2,(-1,-1)),
-             m2V(b1,b2,( 0,-1)),m2V(b1,b2,( 1,-1))]
+             m2V(b1,b2,( 0,-1)),m2V(b1,b2,( 1,-1))]'''
     # Creamos el espacio para la matriz en que operaremos
     v = np.array(vecinos)
     eq = np.zeros((8,11))
@@ -268,9 +343,9 @@ def reciprocalBackgroundMesh(l,vl,t):
     '''
     Calcula los puntos de Red de la red reciproca y la maya formada por las FBZ de estos.
     Regresa 2 listas con las posiciones X y Y de los puntos y una 'colección' de lineas usadas por
-    'Polygon' para cargar un poligono en pabtalla usando la función 'add_patch'.
+    'Polygon' para cargar un polígono en pantalla usando la función 'add_patch'.
     l  -> Red para la que se lleva a cabo la operación
-    vl -> Vertices de la FBZ asociada a esta red
+    vl -> Vértices de la FBZ asociada a esta red
     t  -> Tamaño con el que se pintarán las lineas.
     '''
     xs = []
