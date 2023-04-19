@@ -8,7 +8,8 @@ class system:
         name -> Nombre del sistema
         '''
         self.redes = lor #Lista de Redes del Sistema
-        self.name = 'Sistema ['+','.join([l.name for l in lor])+']' #Nombre del Sistema
+        if name=="":
+            self.name = 'Sistema ['+','.join([l.name for l in lor])+']' #Nombre del Sistema
         self.theta = th  #Ángulo entre capas de un sistema binario
         self.resultados = []#Lista de Puntos de red comunes para todas las capas
         self.loMat = []  #Lista de Matrices de transformación sugeridas
@@ -65,14 +66,14 @@ class system:
         #print("---Matriz rechazada--")
         return 1
     
-    def calculateTransformationMatrices(self):
+    def calculateTM(self):
         '''
         Genera una lista de matrices de trasformación optimas de menor tamaño a partir
         de la lista 'resultados' del sistema.
         '''
         if self.resultados == []:
             errmsg = "No hay puntos de red en común para las capas."
-            errmsg +="\nEjecute la función calculateSharedLP"
+            errmsg +="\nEjecute la función searchLP previamente."
             errmsg +="\n*En caso de ya haberlo hecho aumente el rango de búsqueda (rangeOfSearch) o el error mínimo aceptado (epsilon)"
             print(errmsg)
             return -1
@@ -116,7 +117,7 @@ class system:
         self.SuperRed = superMesh(sa,sb,self.redes)
         return 1
     
-    def calculateSharedLP(self, rangeOfSearch=15, epsilon=0.1):
+    def searchLP(self, rangeOfSearch=15, epsilon=0.1):
         '''
         Busca las variables que desciben las transformaciones que debe tener cada Red del sistema para coincidir
         con una Super-Red común a todas ellas.

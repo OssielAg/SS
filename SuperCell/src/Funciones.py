@@ -1,7 +1,7 @@
 from .Lattice import *
 from .analyzer import *
 
-# Metodos derivados
+# Métodos derivados
 
 def isitin(r,cent, sr, slvl):
     '''
@@ -18,18 +18,18 @@ def isitin(r,cent, sr, slvl):
     eq2 = (q1*v2)-(q2*v1)
     eq3 = (p2*u1)-(p1*u2)
     eq4 = (p2*v1)-(p1*v2)
-    for c in r.atms:# Iteramos en cada lista de Atomos de la Red r
+    for c in r.atms:# Iteramos en cada lista de Átomos de la Red r
         nc=[]
-        for a in c:# Iteramos en cada atomo de la lista c
+        for a in c:# Iteramos en cada átomo de la lista c
             (x,y) = sumaV(cent,a.pos)
             # Calculamos la posición del átomo con respecto a las coordenadas expresadas en los vectores de sr
             nx = (eq1*x+eq2*y)/eq0 
             ny = (eq3*x+eq4*y)/eq0
-            # Evaluamos si se encuentra dentro de la Celda minima de sr
+            # Evaluamos si se encuentra dentro de la Celda mínima de sr
             if (nx<(1+er) and nx>(0-er)) and (ny<(1+er) and ny>(0-er)):
                 aPosZ = ((a.posZ*r.detachment)+slvl)/sr.detachment
                 nAtm = Atomo((nx,ny),posZ = aPosZ ,color=a.color,sig=a.sig)
-                #print("Agregado atomo",nAtm)
+                #print("Agregado átomo",nAtm)
                 nAtm.clasifica(sr.atms)
     for e in r.enls:
         (x1,y1) = sumaV(cent,e[0])
@@ -63,10 +63,10 @@ def megeCut(mo, sm, lvl=0):
 
 def superMesh(sa,sb,layerList):
     '''
-    Crea una Super Red en bace a una lista de Redes "layerList" con los vectores primitivos sa y sb
-    sa        -> Vector primitivo 'a' de la Super Red 
-    sb        -> Vector primitivo 'b' de la Super Red
-    layerList -> Lista de capas que forman el sistema al que identifica la Super Red
+    Crea una Súper Red en base a una lista de Redes "layerList" con los vectores primitivos sa y sb
+    sa        -> Vector primitivo 'a' de la Súper Red 
+    sb        -> Vector primitivo 'b' de la Súper Red
+    layerList -> Lista de capas que forman el sistema al que identifica la Súper Red
     '''
     sR = Red(sa,sb)
     sR.enls = []
@@ -88,7 +88,7 @@ def superMesh(sa,sb,layerList):
 
 def limpia(loa, acc=8):
     '''
-    Quita atomos repetidos de una lista de atomos
+    Quita átomos repetidos de una lista de átomos
     loa -> Lista de átomos que limpiaremos
     acc -> Exactitud con la que trabajaremos
     '''
@@ -176,8 +176,8 @@ def calculaPares(r1, r2, th = 0.0, maxIt=15, eps=0.1, show=False):
     menos de 'eps', además a y b son a lo más 'maxIt'
     
     Regresa una lista doble con todos los resultados que cumplen lo anterior separados en los que tienen b positiva
-    y b negativa (hace la busqueda en los cuadrantes I y IV del plano cartesiano), además regresa tambien el promedio
-    de los errores mínimos en ambas sonas.
+    y b negativa (hace la búsqueda en los cuadrantes I y IV del plano cartesiano), además regresa también el promedio
+    de los errores mínimos en ambas zonas.
     '''
     (u,v), (p,q) = r1.getVectors(), r2.getVectors()
     (u_1,u_2), (v_1,v_2) = u, v
@@ -276,23 +276,26 @@ def importa(name):
     Importa un archivo vasp señalado por 'name' y lo transforma en una Red
     '''
     errormsg = '''El archivo no tiene el formato soportado por el programa.
-Observe las caracteristicas soportadas escribiendo <importa?>'''
+Observe las características soportadas escribiendo <importa?>'''
     xyz = []
     try:
         # cargamos el nombre de la Red
         lines = readFile(name+".vasp")
         print("Se leerá el archivo {}".format(name+".vasp"))
-        nameRed = lines[0]
+        nameRed = lines[0].rstrip()
         #Cargamos los vectores primitivos de la Red
         vA = leeNumeros(lines[2])
         vB = leeNumeros(lines[3])
         vC = leeNumeros(lines[4])
-        #Cargamos una lista con los tipos de Átomos en la Red y una con el numero de átomos de ese tipo
-        toA = lines[5].split()
-        noA = leeNumeros(lines[6])
         if (round(vA[2],5)!=0.0 or round(vB[2],5)!=0.0 or round(vC[0],5)!=0.0 or round(vC[1],5)!=0.0):
-            print("Vectores iniciales erroneos\n",errormsg)
-            raise SyntaxError('Documento no soportado')
+            msg = '''
+            Vectores iniciales no soportados tal cómo están, se modificarán para tener la forma:
+                a = (a1,a2,0), b = (b1,b2,0), c = (0,0,c3)
+            Se deja discreción su funcionalidad.
+            '''
+            print(msg,errormsg)
+            #raise SyntaxError('Documento no soportado')
+        #Cargamos una lista con los tipos de Átomos en la Red y una con el numero de átomos de ese tipo
         aTipos = lines[5].split()
         aCant = leeNumeros(lines[6])
         if len(aTipos)!=len(aCant):
@@ -320,12 +323,13 @@ Observe las caracteristicas soportadas escribiendo <importa?>'''
 
 #----------------------Redes prediseñadas------------------------------
 def ejemplos():
-    texto ='''Se cuenta con redes predefinidas, estas son:
-hexa6(p,atms,name) -> Genera una Red hexagonal con constante de red 'p' y con los atomos de la lista atms.
-    Si atms no se dá, entonces tendrá 2 átomos dentro de su base, generando una red hexagonal con 6 simetrias radiales.
+    texto ='''
+    Se cuenta con redes predefinidas, estas son:
+hexa6(p,atms,name) -> Genera una Red hexagonal con constante de red 'p' y con los átomos de la lista atms.
+    Si atms no se dá, entonces tendrá 2 átomos dentro de su base, generando una red hexagonal con 6 simetrías radiales.
 
-hexa3(p,atms,name) -> Genera una Red hexagonal con constante de red 'p' y con los atomos de la lista atms.
-    Si esta no se da entonces tendrá 2 átomos, uno dentro de su base y otro en un vertice, generando una red hexagonal con 3 simetrias radiales.
+hexa3(p,atms,name) -> Genera una Red hexagonal con constante de red 'p' y con los átomos de la lista atms.
+    Si esta no se da entonces tendrá 2 átomos, uno dentro de su base y otro en un vértice, generando una red hexagonal con 3 simetrías radiales.
 
 rectMesh(p1,p2,atms,name) -> Genera una Red rectangular con las constantes de red p1, p2 y los átomos señalados en la lista atms.
     Si esta no se dá, se generará con un solo átomo en el centro de su base.
@@ -334,47 +338,59 @@ grafeno() -> Genera una red de Grafeno, con constante de red 2.44 A y con sus á
 
 grafeno3() -> Genera una red de Grafeno, con constante de red 2.44 A y con sus átomos acomodados en el formato de hexa3
 
-blackPhospho() -> Genera una Red de Fosforeno Negro con las constantes de red 3.3061099052 y 4.552418232.'''
+blackPhospho() -> Genera una Red de Fosforeno Negro con las constantes de red 3.3061099052 y 4.552418232.
+'''
     print(texto)
     
 def hexa6(p,atms=['C','C'],name=''):
-    '''Genera una Red hexagonal con constante de red 'p' y con los atomos de la lista atms, si esta no se da entonces tendrá 2 átomos dentro de su base, generando una red hexagonal con 6 simetrias radiales.'''
+    '''
+    Genera una Red hexagonal con constante de red 'p' y con los átomos de la lista atms.
+    Si esta no es dada entonces tendrá 2 átomos dentro de su base, generando una red hexagonal con 6 simetrías radiales.
+    '''
     u,v=(p,0.0),(-p/2,math.sqrt(3)*(p/2))
     p1,p2,p3,p4 = (1/3,2/3),(2/3,1/3),(1/3,-1/3),(4/3,2/3)
     ats = [Atomo(p1, sig = atms[0]),Atomo(p2, sig = atms[1])]
     return Red(u,v,atms=ats,name=name,enls=[(p1,p2),(p2,p3),(p2,p4)])
 
 def hexa3(p,atms=['C','C'],name=''):
-    '''Genera una Red hexagonal con constante de red 'p' y con los atomos de la lista atms, si esta no se da entonces tendrá 2 átomos, uno dentro de su base y otro en un vertice, generando una red hexagonal con 3 simetrias radiales.'''
+    '''
+    Genera una Red hexagonal con constante de red 'p' y con los átomos de la lista atms.
+    Si esta no se da entonces tendrá 2 átomos, uno dentro de su base y otro en un vértice, generando una red hexagonal con 3 simetrías radiales.'''
     u,v=(p,0.0),(-p/2,math.sqrt(3)*(p/2))
     p1,p2,p3,p4 = (0.0,0.0),(1/3,2/3),(0,1),(1,1)
     ats = [Atomo(p1, sig = atms[0]),Atomo(p2, sig = atms[1])]
     return Red(u,v,atms=ats,name=name,enls=[(p1,p2),(p2,p3),(p2,p4)])
 
 def rectMesh(p1,p2,atms='C',name=''):
-    '''Genera una Red rectangular con las constantes de red p1, p2 y los átomos señalados en la lista atms, si esta no se dá, se generará con un solo átomo en el centro de su base.'''
+    '''
+    Genera una Red rectangular con las constantes de red p1, p2 y los átomos señalados en la lista atms.
+    Si esta no se da, se generará con un solo átomo en el centro de su base.'''
     u,v = (p1,0.0),(0.0,p2)
     p1,p2,p3 = (1/2,1/2),(3/2,1/2),(1/2,3/2)
     ats = [Atomo(p1,sig = atms)]
     return Red(u,v,atms=ats,name=name,enls=[(p1,p2),(p1,p3)])
     
 def grafeno():
-    '''Genera una red de Grafeno, con constante de red 2.44 A y con sus átomos dentro de su base, generando una red hexagonal con 6 simetrias radiales.'''
+    '''
+    Genera una red de Grafeno, con constante de red 2.44 A y con sus átomos dentro de su base,
+    generando una red hexagonal con 6 simetrías radiales.
+    '''
     return hexa6(2.44, name='Grafeno')
     
 def grafeno3():
-    '''Genera una red de Grafeno, con constante de red 2.44 A y con uno de sus átomos dentro de su base y otro en un vertice, generando una red hexagonal con 3 simetrias radiales.'''
+    '''
+    Genera una red de Grafeno, con constante de red 2.44 A y con uno de sus átomos dentro de su base y otro en un vértice,
+    generando una red hexagonal con 3 simetrías radiales.
+    '''
     return hexa3(2.44, name='Grafeno(s3)')
 
 def blackPhospho():
-    '''Genera una Red de Fosforeno Negro con las constantes de red 3.3061099052 y 4.552418232.'''
-    #m1=rectMesh(3.3061099052,4.552418232)
+    '''
+    Genera una Red de Fosforeno Negro con las constantes de red 3.3061099052 y 4.552418232.
+    '''
     a,b=(3.3061099052,0.0), (0.0,4.552418232)
-    #m1.name='Black-Phosphorene'
     p1,p2=(0.000000000,0.913483083),(0.500000000,0.579813302)
     p3,p4=(0.000000000,0.079836130),(0.500000000,0.413437814)
     ats = [Atomo(p1,sig='P',posZ=0.266835123),Atomo(p2,sig='P',posZ=0.266945183),Atomo(p3,sig='P',posZ=0.181006327),Atomo(p4,sig='P',posZ=0.181094214)]
     enl = [(p1,p2),(p3,p4),(p2,p4),(p2,sumaV(p1,(1.0,0.0))),(p4,sumaV(p3,(1.0,0.0))),(p1,sumaV(p3,(0.0,1.0)))]
-    #m1 = Red(a,b,atms=ats,name='Black-Phosphorene',enls=enl)
-    #m1.atms[0] = ats
     return Red(a,b,atms=ats,name='Black-Phosphorene',enls=enl)
