@@ -169,7 +169,67 @@ def buscaSVects(vectU,vectV, th, rango=15, limDelta=0.1, show=True):
                             print(">>({},{})-({},{}): Delta={}%".format(a,b,round(c),round(d),delta*100,":",dist(r1,r2)))
     return res
 
-def calculaPares(r1, r2, th = 0.0, maxIt=15, eps=0.1, show=False):
+def pts(layer:Red, max_it=15):
+    res = []
+    a,b = layer.a,layer.b
+    for k in range(1,(max_it*2)-1):
+        for i in range(min(max_it,k+1)):
+            j=k-i
+            if j<max_it:
+                res.append([[[i,j],m2V(a,b,(i,j))],0.0])
+                if j!=0:
+                    res.append([[[i,-j],m2V(a,b,(i,-j))],0.0])
+    return res
+
+def calcCD(substrate, layer, ab):
+    (a,b) = ab
+    (u,v), (p,q) = substrate.getVectors(), layer.getVectors()
+    (u_1,u_2), (v_1,v_2) = u, v
+    (p_1,p_2), (q_1,q_2) = p, q
+    eq0 = (p_2*q_1)-(p_1*q_2)
+    eq1 = (q_1*u_2)-(q_2*u_1)
+    eq2 = (q_1*v_2)-(q_2*v_1)
+    eq3 = (p_2*u_1)-(p_1*u_2)
+    eq4 = (p_2*v_1)-(p_1*v_2)
+    c = ((eq1*a)+(eq2*b))/(eq0)
+    d = ((eq3*a)+(eq4*b))/(eq0)
+    return (round(c),round(d))
+    
+    
+def calcPR(pts, substrate, layer, th=0.0, eps=0.1):
+    (u,v), (p,q) = substrate.getVectors(), layer.getVectors()
+    (u_1,u_2), (v_1,v_2) = u, v
+    (p_1,p_2), (q_1,q_2) = p, q
+    res = []
+    eq0 = (p_2*q_1)-(p_1*q_2)
+    eq1 = (q_1*u_2)-(q_2*u_1)
+    eq2 = (q_1*v_2)-(q_2*v_1)
+    eq3 = (p_2*u_1)-(p_1*u_2)
+    eq4 = (p_2*v_1)-(p_1*v_2)
+    for pt in pts:
+        [a,b] = pt[0][0]
+        c = ((eq1*a)+(eq2*b))/(eq0)
+        d = ((eq3*a)+(eq4*b))/(eq0)
+        #Vector esperado
+        r1 = pt[0][1]
+        #Vector aproximado
+        r2 = m2V(p,q,(round(c),round(d)))
+        err = dist(r1,r2)/2
+        if err<=eps:
+            newErr = pt[1]+err
+            res = acomoda(pt[0],newErr,res,len(pts))
+    return res
+    
+def calculaPares(redes, max_val=15, eps=0.1):
+    if len(redes)>1:
+        sustrato = redes[0]
+        puntos = pts(sustrato, max_it=max_val)
+        for i in range(1,len(redes)):
+            puntos = calcPR(puntos, sustrato, redes[i], eps=eps)
+        return [[p[0][0],p[1]/(len(redes)-1)] for p in puntos]
+    return []
+
+def calculaPares2(r1, r2, th = 0.0, maxIt=15, eps=0.1, show=False):
     '''
     Calcula los pares enteros (a,b) y (c,d) tales que si u,v son los vectores generadores de 'r1' y rp,rq los
     vectores generadores de 'r2' rotada en 'th' grados, entonces P1 = (au + bv) y P2 = (c(rp) + d(rq)) difieren en

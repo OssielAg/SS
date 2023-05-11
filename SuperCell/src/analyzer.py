@@ -45,12 +45,12 @@ def calculaEM(r1, r2, th = 0.0, maxIt=15):
                     r1 = sumaV(multV(a,u),multV(b,v))
                     #Vector aproximado
                     r2 = sumaV(multV(round(c),rp),multV(round(d),rq))
-                    err = dist(r1,r2)
+                    err = dist(r1,r2)/2
                     if err < 0.6:
                         puntos = acomoda(r1,err,puntos,2)
     if len(puntos)>=2:
         minim = (puntos[0][1]+puntos[1][1])/2
-    return minim, det(vTm(puntos[0][0],puntos[1][0]))
+    return minim
 
 def explora(r1, r2, mIt=15, eMax=0.5, thI=0.0, thF=180.0, acc=1):
     '''
@@ -66,11 +66,12 @@ def explora(r1, r2, mIt=15, eMax=0.5, thI=0.0, thF=180.0, acc=1):
     print(".............")
     for t in range(i,f+1):
         theta = t/(10**acc)
-        b = "Analizando...Theta = "+str(theta)+"°"
+        prc=round((t/(f-i))*100)
+        b = "Analizando..."+str(prc)+"%"
         print(b,end="\r")
-        m,d = calculaEM(r1, r2, th = theta, maxIt=mIt)
+        m = calculaEM(r1, r2, th = theta, maxIt=mIt)
         if m < eMax:
-            graf.append([theta,m,d])
+            graf.append([theta,m])
     print(end="\r")
     print('**********Exploración finalizada**********')
     return np.array(graf)
@@ -85,7 +86,7 @@ def analiza(r1,r2,roAng=(0.0,180.0),erMax=0.005,mor=15,accuracy=2):
     '''
     (i,f) = roAng
     graf = explora(r1, r2, mIt=mor, thI=i, thF=f, acc=accuracy)
-    xs, ys, ds = graf[:,0], graf[:,1], graf[:,2]
+    xs, ys = graf[:,0], graf[:,1]
     plt.plot(xs, ys)
     plt.show()
     resultados=[]
@@ -95,7 +96,7 @@ def analiza(r1,r2,roAng=(0.0,180.0),erMax=0.005,mor=15,accuracy=2):
         if analisis[i]==True:
             if(ys[i]<erMax):
                 resultados.append([xs[i],ys[i]])
-                print("\t{:.3f} : {:.5f}:det={}".format(xs[i],ys[i],ds[i]))
+                print("\tTh={:.3f} : Er.Aprx={:.5f}A".format(xs[i],ys[i]))
     return resultados,graf
 
 def muestra(lor,r1,r2):
@@ -146,11 +147,15 @@ def ajusta(r1,r2,t1,t2,p1,p2):
 
 
 #-----------------Funciones Auxiliares para la funciòn 'muestra'.-----------------
-def strS(i,n=3):
+def strS(i,n=4):
     '''
     Combierte i en un string de al menos tamaño n rellenando con espacios en blanco
     '''
-    s = str(i)
+    if type(i)==float:
+        s = str(round(i,5))
+        n = max(8,n)
+    else:
+        s = str(i)
     while len(s)<n:
         s=" "+s
     return s

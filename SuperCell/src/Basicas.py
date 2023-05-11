@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import collections  as mc
 from matplotlib.patches import Polygon
+import copy
 import math
 import random
 import re
