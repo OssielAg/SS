@@ -182,6 +182,14 @@ def pts(layer:Red, max_it=15):
     return res
 
 def calcCD(substrate, layer, ab):
+    '''
+    Dadas 2 redes 'substrate' y 'layer' calcula los enteros 'c' y 'd' tales que para los
+    vectores primitivos de 'substrate' (u,v) y los vectores primitivos de 'layer' (p,q)
+    \$p'= cp + dq\$, aproxime a \$p = au + bv\$.
+    substrate -> Red base.
+    layer     -> Red por aproximar
+    ab        -> Pareja de enteros que definen al vector que queremos aproximar
+    '''
     (a,b) = ab
     (u,v), (p,q) = substrate.getVectors(), layer.getVectors()
     (u_1,u_2), (v_1,v_2) = u, v
@@ -196,7 +204,7 @@ def calcCD(substrate, layer, ab):
     return (round(c),round(d))
     
     
-def calcPR(pts, substrate, layer, th=0.0, eps=0.1):
+def calcPR(pts, substrate, layer, eps=0.05):
     (u,v), (p,q) = substrate.getVectors(), layer.getVectors()
     (u_1,u_2), (v_1,v_2) = u, v
     (p_1,p_2), (q_1,q_2) = p, q
@@ -214,16 +222,20 @@ def calcPR(pts, substrate, layer, th=0.0, eps=0.1):
         r1 = pt[0][1]
         #Vector aproximado
         r2 = m2V(p,q,(round(c),round(d)))
-        err = dist(r1,r2)/2
+        #err = dist(r1,r2)/(2*long(r1))
+        err = math.sqrt((dist(r1,r2)**2)/(3*long(r1)))
         if err<=eps:
             newErr = pt[1]+err
             res = acomoda(pt[0],newErr,res,len(pts))
     return res
     
-def calculaPares(redes, max_val=15, eps=0.1):
+def calculaPares(redes, max_val=15, eps=0.05):
     if len(redes)>1:
         sustrato = redes[0]
+        #Calcula todos los Puntos de Red de la capa 0 para el rango indicado por max_val
         puntos = pts(sustrato, max_it=max_val)
+        #En cada capa actualiza la lista de Puntos de red dejando los puntos que coinciden, con
+        #un error inferor a eps, con algún punto de red para la red en la capa actual 
         for i in range(1,len(redes)):
             puntos = calcPR(puntos, sustrato, redes[i], eps=eps)
         return [[p[0][0],p[1]/(len(redes)-1)] for p in puntos]

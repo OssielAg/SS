@@ -109,8 +109,9 @@ class system:
                     M = vTm((b1,b2),(a1,a2))
                 a,b = transforma2v(self.redes[0].a,self.redes[0].b,M)
                 if cAng(a,b) >= min_angle:
-                    #print("Analizando:",M)
-                    self.adjust(M)
+                    if 180-cAng(a,b) >= min_angle:
+                        #print("Analizando:",M)
+                        self.adjust(M)
                 #else:
                     #print(" - -Red generada con ángulo menor a {}°".format(min_angle))
         if s : print("Matrices guardadas en lista 'loMat'")
