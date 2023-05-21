@@ -227,6 +227,7 @@ class Red:
         self.a, self.b = newA, newB
         self.OriginalA = rota(newA, -th)
         self.OriginalB = rota(newB, -th)
+        self.inAngle = abs(cAng(newA, newB))
         a1,a2 = newA
         b1,b2 = newB
         self.reciprocalVectors = cRecip((a1,a2,0.0),(b1,b2,0.0),(0.0,0.0,self.detachment))

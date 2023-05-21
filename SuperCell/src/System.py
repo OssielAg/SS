@@ -58,7 +58,7 @@ class system:
         b, i = self.goesHere(M,i+1)#Verifica en la siguiente posición
         return b, i
     
-    def adjust(self, M):
+    def adjust(self, M,i,j):
         '''
         Verifica si una matriz de trasformación M entra a la lista loMat y la coloca manteniendo el orden
         M -> Matriz a examinar
@@ -68,9 +68,12 @@ class system:
             return 0
         b, i = self.goesHere(M,0)
         if b:
-            #print("--Matriz agregada--(",M,")")
+            print("--Matriz agregada por resultados {} y {}".format(i,j))
             if len(self.loMat)<self.MaxNumM:
-                self.loMat.append(M)
+                if i<len(self.loMat):
+                    self.loMat.insert(i,M)
+                else:
+                    self.loMat.append(M)
             else:
                 self.loMat.insert(i,M)
                 del self.loMat[-1]
@@ -96,7 +99,7 @@ class system:
             for r in self.resultados:
                 [m,n]=r[0]
                 M = vTm((m,n),(-n,m-n))
-                self.adjust(M)
+                self.adjust(M,0,0)
                 if s: print("Matrices guardadas en lista 'loMat'")
                 return 0
         for i in range(len(self.resultados)):
@@ -111,7 +114,7 @@ class system:
                 if cAng(a,b) >= min_angle:
                     if 180-cAng(a,b) >= min_angle:
                         #print("Analizando:",M)
-                        self.adjust(M)
+                        self.adjust(M,i,j)
                 #else:
                     #print(" - -Red generada con ángulo menor a {}°".format(min_angle))
         if s : print("Matrices guardadas en lista 'loMat'")
