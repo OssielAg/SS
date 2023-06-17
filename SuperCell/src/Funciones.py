@@ -424,13 +424,13 @@ def hexa6(p,atms=['C','C'],name=''):
     ats = [Atomo(p1, sig = atms[0]),Atomo(p2, sig = atms[1])]
     return Red(u,v,atms=ats,name=name,enls=[(p1,p2),(p2,p3),(p2,p4)])
 
-def hexa3(p,atms=['C','C'],name=''):
+def hexa3(p,atms=[['C','C'],['sienna','sienna']],name=''):
     '''
     Genera una Red hexagonal con constante de red 'p' y con los átomos de la lista atms.
     Si esta no se da entonces tendrá 2 átomos, uno dentro de su base y otro en un vértice, generando una red hexagonal con 3 simetrías radiales.'''
     u,v=(p,0.0),(-p/2,math.sqrt(3)*(p/2))
     p1,p2,p3,p4 = (0.0,0.0),(1/3,2/3),(0,1),(1,1)
-    ats = [Atomo(p1, sig = atms[0]),Atomo(p2, sig = atms[1])]
+    ats = [Atomo(p1, sig = atms[0][0], color=atms[1][0]),Atomo(p2, sig = atms[0][1], color=atms[1][1])]
     return Red(u,v,atms=ats,name=name,enls=[(p1,p2),(p2,p3),(p2,p4)])
 
 def rectMesh(p1,p2,atms='C',name=''):
@@ -463,6 +463,6 @@ def blackPhospho():
     a,b=(3.3061099052,0.0), (0.0,4.552418232)
     p1,p2=(0.000000000,0.913483083),(0.500000000,0.579813302)
     p3,p4=(0.000000000,0.079836130),(0.500000000,0.413437814)
-    ats = [Atomo(p1,sig='P',posZ=0.266835123),Atomo(p2,sig='P',posZ=0.266945183),Atomo(p3,sig='P',posZ=0.181006327),Atomo(p4,sig='P',posZ=0.181094214)]
+    ats = [Atomo(p1,sig='P',color='gold',posZ=0.266835123),Atomo(p2,sig='P',color='gold',posZ=0.266945183),Atomo(p3,sig='P',color='gold',posZ=0.181006327),Atomo(p4,sig='P',color='gold',posZ=0.181094214)]
     enl = [(p1,p2),(p3,p4),(p2,p4),(p2,sumaV(p1,(1.0,0.0))),(p4,sumaV(p3,(1.0,0.0))),(p1,sumaV(p3,(0.0,1.0)))]
     return Red(a,b,atms=ats,name='Black-Phosphorene',enls=enl)

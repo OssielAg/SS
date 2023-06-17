@@ -80,6 +80,21 @@ def to2D(v):
     return (x,y)
     
 #--------------------Funciones para matrices--------------------#
+def sumaM(A,B):
+    '''
+    Suma las matrices A y B
+    '''
+    C = np.array(A)+np.array(B)
+    return C.tolist()
+
+def multM(M,x):
+    '''
+    Multiplica la matriz M por una constante x
+    '''
+    xM=x*np.array(M)
+    return xM.tolist()
+
+    
 def vTm(v1,v2):
     '''
     Transforma dos vectores de dimensión 2 a una matriz de 2x2
