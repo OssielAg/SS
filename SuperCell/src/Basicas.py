@@ -47,10 +47,12 @@ def long(v):
     return dist((0,0),v)
 
 def cAng(u,v):
-    '''Calcula el ángulo interno entre 2 vectores'''
+    '''Calcula el ángulo formado entre los vectores 'u' y 'v'.'''
     (u1,u2),(v1,v2) = u, v
     x = round(((u1*v1)+(u2*v2))/(dist((0,0),u)*dist((0,0),v)),5)
-    return math.degrees(math.acos(x))
+    th = math.degrees(math.acos(x))
+    if (u1*v2-u2*v1)<0: th=-th
+    return th
 
 def cRot(v):
     '''Calcula el ángulo de un vector con respecto al eje x'''
@@ -130,6 +132,14 @@ def m2M(m1,m2):
     [[a,b],[c,d]] = m1
     [[x,y],[z,w]] = m2
     return [[(a*x+b*z),(a*y+b*w)],[(c*x+d*z),(c*y+d*w)]]
+
+def transfVs(u,v,t):
+    '''
+    Transforma los vectores u y v al multiplicar la matriz [[u1,v1],[u2,v2]] por la matriz [[t1,t2],[t3,t4]]
+    '''
+    m,n,p,q = t
+    return m2V(u,v,(m,p)), m2V(u,v,(n,q))
+
 
 #--------------------Funciones misceláneas--------------------#
 def getLim(u,v,m,n):

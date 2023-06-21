@@ -51,6 +51,12 @@ class Red:
     def __str__(self):
         return self.showData()
     
+    def get_pv(self):
+        '''
+        Regresa los vectores primitivos de la red
+        '''
+        return self.a, self.b
+    
     def showXY(self, x, y, x0=0 ,y0=0, t=10,name=''):
         '''
         Muestra en pantalla la imagen resultante de repetir la celda unitaria de la Red 'x' veces en su vector 'a' y
@@ -105,16 +111,16 @@ class Red:
         fig, maxs = plt.subplots()
         lis = np.array(ats.copy())
         xs, ys = lis[:,0], lis[:,1]
-        #Dibuja los Atomos
-        maxs.scatter(xs,ys, color=col,s=t)
         #Cargamos los contornos de las celdas en una lista de lineas
-        lr = mc.LineCollection(np.array(red), colors='silver', linewidths=(t/20))
+        lr = mc.LineCollection(np.array(red), colors='silver', linewidths=(t/30))
         #Cargamos los enlaces en una lista de lineas
-        lc = mc.LineCollection(np.array(enls), colors='black', linewidths=(t/10))
+        lc = mc.LineCollection(np.array(enls), colors='black', linewidths=(t/20))
         #Dibuja los Enlaces
         maxs.add_collection(lc)
         #Dibuja los contornos de las celdas
         maxs.add_collection(lr)
+        #Dibuja los Atomos
+        maxs.scatter(xs,ys, color=col,s=t*3)
         maxs.axes.xaxis.set_visible(False)
         maxs.axes.yaxis.set_visible(False)
         medX = ((lmsx[0]+lmsx[1])/2)

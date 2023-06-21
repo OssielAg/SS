@@ -114,13 +114,6 @@ def limpia(loa, acc=8):
             res.append(loa[i])
     return res
 
-def transfVs(u,v,t):
-    '''
-    Transforma los vectores u y v al multiplicar la matriz [[u1,v1],[u2,v2]] por la matriz [[t1,t2],[t3,t4]]
-    '''
-    m,n,p,q = t
-    return m2V(u,v,(m,p)), m2V(u,v,(n,q))
-
 def buscaSVects(vectU,vectV, th, rango=15, limDelta=0.1, show=True):
     lim = limDelta
     f1, f2 = 0, 0
@@ -185,7 +178,7 @@ def calcCD(substrate, layer, ab):
     '''
     Dadas 2 redes 'substrate' y 'layer' calcula los enteros 'c' y 'd' tales que para los
     vectores primitivos de 'substrate' (u,v) y los vectores primitivos de 'layer' (p,q)
-    \$p'= cp + dq\$, aproxime a \$p = au + bv\$.
+    p'= cp + dq, aproxime a p = au + bv.
     substrate -> Red base.
     layer     -> Red por aproximar
     ab        -> Pareja de enteros que definen al vector que queremos aproximar
@@ -205,6 +198,10 @@ def calcCD(substrate, layer, ab):
     
     
 def calcPR(pts, substrate, layer, eps=0.05):
+    '''
+    Verifica en una lista de Puntos de red  'pts' para la red 'Substrate' dejando sólamente los correspondientes con
+    puntos de red para la red 'layer' con una diferencia máxima dada por 'eps'
+    '''
     (u,v), (p,q) = substrate.getVectors(), layer.getVectors()
     (u_1,u_2), (v_1,v_2) = u, v
     (p_1,p_2), (q_1,q_2) = p, q
@@ -222,14 +219,19 @@ def calcPR(pts, substrate, layer, eps=0.05):
         r1 = pt[0][1]
         #Vector aproximado
         r2 = m2V(p,q,(round(c),round(d)))
-        #err = dist(r1,r2)/(2*long(r1))
-        err = math.sqrt((dist(r1,r2)**2)/(3*long(r1)))
+        err = dist(r1,r2)/(long(r1))
+        #err = math.sqrt((dist(r1,r2)**2)/(3*long(r1)))
         if err<=eps:
             newErr = pt[1]+err
             res = acomoda(pt[0],newErr,res,len(pts))
     return res
     
 def calculaPares(redes, max_val=15, eps=0.05):
+    '''
+    Calcula los pares (a,b) correspondientes a puntos de la red 0 en la lista 'redes' que correspondan a puntos de la red
+    para las demás redes a no más de un error marcado por 'eps'.
+    Los valores de a y b están acotados por [-'max_val','max_val']
+    '''
     if len(redes)>1:
         sustrato = redes[0]
         #Calcula todos los Puntos de Red de la capa 0 para el rango indicado por max_val
@@ -238,85 +240,37 @@ def calculaPares(redes, max_val=15, eps=0.05):
         #un error inferor a eps, con algún punto de red para la red en la capa actual 
         for i in range(1,len(redes)):
             puntos = calcPR(puntos, sustrato, redes[i], eps=eps)
-        return [[p[0][0],p[1]/(len(redes)-1)] for p in puntos]
+        pr = [[p[0][0],p[1]/(len(redes)-1)] for p in puntos]
+        return sorted(pr, key=lambda op : op[1])
     return []
 
-def calculaPares2(r1, r2, th = 0.0, maxIt=15, eps=0.1, show=False):
+def corresponding_points(l1, l2, M):
     '''
-    Calcula los pares enteros (a,b) y (c,d) tales que si u,v son los vectores generadores de 'r1' y rp,rq los
-    vectores generadores de 'r2' rotada en 'th' grados, entonces P1 = (au + bv) y P2 = (c(rp) + d(rq)) difieren en
-    menos de 'eps', además a y b son a lo más 'maxIt'
+    Dadas dos redes (l1 y l2) y una matris de traslasión M, calcula la Matriz de traslasión M' tal que:
+    l1*M = l2*M'    
+    '''
+    a1, b1 = mTv(M)
+    a2, b2 = (calcCD(l1,l2,a1),calcCD(l1,l2,b1))
+    return vTm(a2,b2)
     
-    Regresa una lista doble con todos los resultados que cumplen lo anterior separados en los que tienen b positiva
-    y b negativa (hace la búsqueda en los cuadrantes I y IV del plano cartesiano), además regresa también el promedio
-    de los errores mínimos en ambas zonas.
+def calc_dd(V_i,V_o):
     '''
-    (u,v), (p,q) = r1.getVectors(), r2.getVectors()
-    (u_1,u_2), (v_1,v_2) = u, v
-    (p_1,p_2), (q_1,q_2) = rp, rq = rota(p,th), rota(q,th)
-    if th==0.0:
-        th=r2.theta
-    res = []
-    f = 1/2 # Factor de importancia de el tamaño del vector resultante
-    rango = maxIt
-    delta = 0.0
-    minE1 = 100
-    minE2 = 100
-    eq0 = (p_2*q_1)-(p_1*q_2)
-    eq1 = (q_1*u_2)-(q_2*u_1)
-    eq2 = (q_1*v_2)-(q_2*v_1)
-    eq3 = (p_2*u_1)-(p_1*u_2)
-    eq4 = (p_2*v_1)-(p_1*v_2)
-    for k in range(1,(2*rango)+1):
-        for i in range(k+1):
-            j = k-i
-            if(i<(rango+1) and j<(rango+1)):
-                # Buscando en b+
-                a,b = i,-j
-                c = ((eq1*a)+(eq2*b))/(eq0)
-                d = ((eq3*a)+(eq4*b))/(eq0)
-                # Vector esperado
-                r1 = m2V(u,v,(a,b))
-                #Vector aproximado
-                r2 = m2V(rp,rq,(round(c),round(d)))
-                # Calcula la proporción entre el tamaño del vector esperado y el aproximado
-                div=long(r2)
-                if div==0: div=10**(-5)
-                delta = long(r1)/div
-                err = dist(r1,r2)#/(long(r2)*f)
-                #print("-({},{}),({},{}):Err={}".format(a,b,round(c),round(d),err))
-                if err < minE1:
-                    minE1 = err
-                if (err < eps):
-                    #print(1-delta)
-                    if(abs(1-delta) < 0.07):
-                        res.append([[a,b],[round(c),round(d)],delta,err])
-                        if show:
-                            print(">{:.3f}°:({},{})-({},{}): Delta={}%".format(th,a,b,round(c),round(d),delta*100),":",dist(r1,r2))
-                # Buscando en b-
-                if j!=0:
-                    a,b = i,j
-                    c = ((eq1*a)+(eq2*b))/(eq0)
-                    d = ((eq3*a)+(eq4*b))/(eq0)
-                    # Vector esperado
-                    r1 = sumaV(multV(a,u),multV(b,v))
-                    #Vector aproximado
-                    r2 = sumaV(multV(round(c),rp),multV(round(d),rq))
-                    # Calcula la proporción entre el tamaño del vector esperado y el aproximado
-                    if((long(r1)!=0.0) & (long(r2)!=0.0)):
-                        delta = long(r1)/long(r2)
-                    err = dist(r1,r2)#/(long(r2)*f)
-                    #print("--({},{}),({},{}):Err={}".format(a,b,round(c),round(d),err))
-                    if err < minE2:
-                        minE2 = err
-                    if (err < eps):
-                        if(abs(1-delta)<0.07):
-                            res.append([[a,b],[round(c),round(d)],delta,err])
-                            if show:
-                                print(">>{:.3f}°:({},{})-({},{}): Delta={}%".format(th,a,b,round(c),round(d),delta*100),":",dist(r1,r2))
-    if (minE1+minE2)/2 < 0.5:
-        if show: print("----------\n{:.3f}°:{}\n\tdelta1={}\n\tdelta2={}\n----------".format(th,(minE1+minE2)/2,minE1,minE2))
-    return res, ((minE1+minE2)/2)
+    Calcula el Grado de distorsion de la red (dd) dados V_i y V_o, las matrices compuestas por los vectores
+    primitivos originales y los vectores primitivos de la red optimisada.
+    dd = sqrt(lambda_1^2+lambda_2^2)/2
+    Donde 'lanmda_1' y 'lamnda_2' son los eigevalores de del Tensor de deformación lagrangiana finita
+    S = 0.5(e+e^t+(e^t*e)) con e = (V_o*V_i^(-1))-I
+    '''
+    [[a,b],[c,d]] = sumaM(m2M(V_o,inv2x2(V_i)),[[-1,0],[0,-1]])
+    s1 = (a**2+2*a+c**2)/2
+    s2 = (a*b+b+c+c*d)/2
+    s3 = s2
+    s4 = (b**2+2*d+d**2)/2
+    aux = math.sqrt(s1**2+s4**2+4*(s2*s3)-2*(s1*s4))
+    lambda_1 = (s1+s4-aux)/2
+    lambda_2 = (s1+s4+aux)/2
+    dd = math.sqrt(lambda_1**2+lambda_2**2)/2
+    return dd
 
 #-------------------------Funciones Auxiliares para la función "Importa(File)"------------------------
 def readFile(name):
@@ -414,14 +368,14 @@ blackPhospho() -> Genera una Red de Fosforeno Negro con las constantes de red 3.
 '''
     print(texto)
     
-def hexa6(p,atms=['C','C'],name=''):
+def hexa6(p,atms=[['C','C'],['sienna','sienna']],name=''):
     '''
     Genera una Red hexagonal con constante de red 'p' y con los átomos de la lista atms.
     Si esta no es dada entonces tendrá 2 átomos dentro de su base, generando una red hexagonal con 6 simetrías radiales.
     '''
     u,v=(p,0.0),(-p/2,math.sqrt(3)*(p/2))
     p1,p2,p3,p4 = (1/3,2/3),(2/3,1/3),(1/3,-1/3),(4/3,2/3)
-    ats = [Atomo(p1, sig = atms[0]),Atomo(p2, sig = atms[1])]
+    ats = [Atomo(p1, sig = atms[0][0], color=atms[1][0]),Atomo(p2, sig = atms[0][1], color=atms[1][1])]
     return Red(u,v,atms=ats,name=name,enls=[(p1,p2),(p2,p3),(p2,p4)])
 
 def hexa3(p,atms=[['C','C'],['sienna','sienna']],name=''):
@@ -460,9 +414,9 @@ def blackPhospho():
     '''
     Genera una Red de Fosforeno Negro con las constantes de red 3.3061099052 y 4.552418232.
     '''
-    a,b=(3.3061099052,0.0), (0.0,4.552418232)
+    a,b=(3.31,0.0), (0.0,4.37)
     p1,p2=(0.000000000,0.913483083),(0.500000000,0.579813302)
     p3,p4=(0.000000000,0.079836130),(0.500000000,0.413437814)
-    ats = [Atomo(p1,sig='P',color='gold',posZ=0.266835123),Atomo(p2,sig='P',color='gold',posZ=0.266945183),Atomo(p3,sig='P',color='gold',posZ=0.181006327),Atomo(p4,sig='P',color='gold',posZ=0.181094214)]
+    ats = [Atomo(p1,sig='P',color='orchid',posZ=0.266835123),Atomo(p2,sig='P',color='orchid',posZ=0.266945183),Atomo(p3,sig='P',color='orchid',posZ=0.181006327),Atomo(p4,sig='P',color='orchid',posZ=0.181094214)]
     enl = [(p1,p2),(p3,p4),(p2,p4),(p2,sumaV(p1,(1.0,0.0))),(p4,sumaV(p3,(1.0,0.0))),(p1,sumaV(p3,(0.0,1.0)))]
     return Red(a,b,atms=ats,name='Black-Phosphorene',enls=enl)
