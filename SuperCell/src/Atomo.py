@@ -27,6 +27,7 @@ class Atomo:
         
     def clasifica(self, lols):
         '''Clasifica al Atomo en una lista de atomos distinguidos por su signo "sig" '''
+        err = 0.0001
         if len(lols)==0:
             lols.append([self])
             return 1

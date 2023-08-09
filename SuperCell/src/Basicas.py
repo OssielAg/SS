@@ -254,6 +254,17 @@ def pmat(m):
         print(lin)
     print("")
     
+def checkP(d,err=0.001):
+    '''
+    Verifica si una diferencia entre 2 valores es inferor a un valor err en mod 1
+    '''
+    d=abs(d)
+    if d<err:
+        return True
+    if abs(d-1)<err:
+        return True
+    return False
+    
 def dameVecinos(red):
     '''
     Regresa los 8 puntos de red del espacio reciproco de 'red' más cercanos al origen 

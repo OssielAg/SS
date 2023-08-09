@@ -61,6 +61,32 @@ def megeCut(mo, sm, lvl=0):
             isitin(mo,(a,b),sm,lvl)
     return 1
 
+def cleanA(r, err=0.001, p=False):
+    '''
+    Limpia la lista de átomos de una Red eliminando los repetidos.
+    '''
+    atms=r.atms
+    newAtms=[]
+    cont=0
+    for loa in atms:
+        lc=loa.copy()
+        for i in range(len(loa)):
+            l2 = loa[i+1:]
+            for a in l2:
+                if a.posZ == loa[i].posZ:
+                    (x1,y1) = loa[i].pos
+                    (x2,y2) = a.pos
+                    if checkP((x1-x2),err):
+                        if checkP((y1-y2),err):
+                            cont+=1
+                            lc.remove(loa[i])
+                            break
+        newAtms.append(lc)
+    if p:##Impime datos de la operación si se define p=True
+        print("Se eliminaron {} átomos repetidos usando un error aceptado de {}".format(cont,err))
+    r.atms=newAtms
+    return 1
+
 def superMesh(sa,sb,layerList):
     '''
     Crea una Súper Red en base a una lista de Redes "layerList" con los vectores primitivos sa y sb
@@ -82,6 +108,7 @@ def superMesh(sa,sb,layerList):
         sR.prof=sR.prof+m.prof
         newName=newName+" ["+m.name+"]"
         i = i + m.detachment
+    cleanA(sR)
     sR.name = newName
     sR.layerList = layerList
     return sR
@@ -266,7 +293,7 @@ def calc_dd(V_i,V_o):
     s2 = (a*b+b+c+c*d)/2
     s3 = s2
     s4 = (b**2+2*d+d**2)/2
-    aux = math.sqrt(s1**2+s4**2+4*(s2*s3)-2*(s1*s4))
+    aux = math.sqrt(abs(s1**2+s4**2+4*(s2*s3)-2*(s1*s4)))
     lambda_1 = (s1+s4-aux)/2
     lambda_2 = (s1+s4+aux)/2
     dd = math.sqrt(lambda_1**2+lambda_2**2)/2

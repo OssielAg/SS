@@ -108,7 +108,7 @@ class system:
         range_search -> Rango de busqueda de los posibles valores de transformaciòn de la red 1 (15 por Default)
         eps          -> Error máximo permitido para las transformaciones (0.1 por Default)
         '''
-        self.searchLP(rangeOfSearch=range_search, epsilon=eps, s=False)
+        self.searchLP(rangeOfSearch=range_search, epsilon=eps, p=False)
         if self.resultados == []:
             print("No se encontraron puntos de red comunes en todas las capas, intente cambiando los valores 'range_search' o 'eps'")
             return -1
@@ -312,7 +312,7 @@ class system:
         else:
             print("Matriz de trasformación:")
             pmat(self.MT)
-            print(self.name,"\nCelda unitaria:")
+            print(self.name,"\nCelda unitaria con {} átomos:".format(self.SuperRed.nOAtms()))
             self.SuperRed.showme()
             print("Espacio Reciproco:")
             self.SuperRed.printReciprocalSpace()
