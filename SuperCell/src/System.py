@@ -100,7 +100,7 @@ class system:
             return analiza(self.redes[0],self.redes[1],roAng=rangeOfAngleSearch,erMax=maxErr,mor=rangeOfSearch,accuracy=precision)
         print("Este método sólo funcional en Sistemas binarios")
        
-    def muestraSR(self, range_search=15, eps=0.05):
+    def creaSR(self, range_search=15, eps=0.05, shw=False):
         '''
         Ejecuta las funciones 'searchLP' y 'calculateTM'
         Con la primer matriz en la lista loMat calculada de esto ejecuta 'createSuperLattice'.
@@ -116,7 +116,8 @@ class system:
         print("Posibles Matrices de trasformación calculadas:{}\nOpción recomendada:".format(len(self.loMat)))
         if self.loMat == []:
             return -2
-        self.createSuperLattice(self.loMat[0])
+        T = self.muestra(shw)
+        self.createSuperLattice(T)
         self.show()
         return 0
     
@@ -137,8 +138,8 @@ class system:
         for T in self.loMat:
             sa, sb = transforma2v(a,b,T)
             err = 0.0
+            inf_c = []
             for i in range(1, len(self.redes)):
-                inf_c = []
                 ai,bi = self.redes[i].get_pv()
                 T_i = corresponding_points(self.redes[0],self.redes[i],T)
                 sa_i, sb_i = transforma2v(ai,bi,T_i)
@@ -159,7 +160,7 @@ class system:
             k+=1
         return info,mejor
     
-    def muestra(self):
+    def muestra(self,shw=True):
         '''
         Muestra una tabla con las caracteristicas de los mejores resultados para las trasnformaciones sugeridas para
         calcular la supercelda que describa el sistema.
@@ -169,9 +170,9 @@ class system:
         lista, optimo = self.analiza_Mat()
         for e in lista:
             [T,(sa,sb),err,inf_c] = e
-            print("\n**Opción {}. T <- Matriz loMat[{}] del sistema".format(cont,cont-1))
+            if shw: print("\n**Opción {}. T <- Matriz loMat[{}] del sistema".format(cont,cont-1))
             table = PrettyTable(["Red","T","Deformación","G de Distorsión","delta--theta","#Átomos"])
-            print("Tamaño de los vectores primitivos:|a|={:.4f},|b|={:.4f}\nÁngulo entre vectores:{:.2f}°".format(long(sa),long(sb),cAng(sa,sb)))
+            if shw: print("Tamaño de los vectores primitivos:|a|={:.4f},|b|={:.4f}\nÁngulo entre vectores:{:.2f}°".format(long(sa),long(sb),cAng(sa,sb)))
             totalAtms = self.redes[0].nOAtms()*det(T)
             table.add_row(["\n" + self.redes[0].name,
                            mtoStr(T),
@@ -191,9 +192,9 @@ class system:
                                nAtm])
 
             cont+=1
-            print(table)
-            print("\t\tTotal de Átomos:{}\tGrado de Deformación del sistema:{:.10f}".format(totalAtms,err))
-        print("***Se recomienda usar la matriz de transformacion loMat[{}]***".format(optimo))
+            if shw: print(table)
+            if shw: print("\t\tTotal de Átomos:{}\tGrado de Deformación del sistema:{:.10f}".format(totalAtms,err))
+        if shw: print("***Se recomienda usar la matriz de transformacion loMat[{}]***".format(optimo))
         return self.loMat[optimo]
     
     def optimize_system(self, T):

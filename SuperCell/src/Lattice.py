@@ -72,7 +72,7 @@ class Red:
         lmsx = [min(lx1[0],lx2[0],lx3[0],lx4[0]),max(lx1[1],lx2[1],lx3[1],lx4[1])]
         lmsy = [min(ly1[0],ly2[0],ly3[0],ly4[0]),max(ly1[1],ly2[1],ly3[1],ly4[1])]
         difMax = max((lmsx[1]-lmsx[0]),(lmsy[1]-lmsy[0]))
-        
+        '''
         lx1,ly1 = getLim(self.a,self.b,x,y)
         mi,ma = min(lx1[0],ly1[0]), max(lx1[1],ly1[1])
         lx2,ly2 = getLim(self.a,self.b,x,y0)
@@ -80,7 +80,7 @@ class Red:
         lx3,ly3 = getLim(self.a,self.b,x0,y)
         mi,ma = min(lx3[0],ly3[0],mi), max(lx3[1],ly3[1],ma)
         lx4,ly4 = getLim(self.a,self.b,x0,y0)
-        mi,ma = (min(lx4[0],ly4[0],mi)-1), (max(lx4[1],ly4[1],ma)+1)
+        mi,ma = (min(lx4[0],ly4[0],mi)-1), (max(lx4[1],ly4[1],ma)+1)'''
         ats=[]
         col=[]
         enls=[]
@@ -126,6 +126,14 @@ class Red:
         medX = ((lmsx[0]+lmsx[1])/2)
         medY = ((lmsy[0]+lmsy[1])/2)
         maxs.set(xlim=(medX-+(difMax/2),medX+(difMax/2)), ylim = (medY-+(difMax/2),medY+(difMax/2)))
+        #Dibuja la escala de la imagen
+        s=max(round(difMax/4),1)
+        f=s/difMax
+        si=0.1
+        sf=si+f
+        plt.axhline(y=(medY-(0.8*(difMax/2))), xmin=si, xmax=sf, c='royalblue')
+        plt.text((medX-(0.8*(difMax/2))), (medY-(0.78*(difMax/2))), "{} nm".format(s/10), fontsize=15, c='royalblue')
+        
         if name!='':
             plt.savefig(('imagenes/'+name),dpi=900, bbox_inches='tight')
         plt.show()
@@ -204,7 +212,7 @@ class Red:
         '''
         Regresa una copia de la Red rotada en "ang" grados
         ''' 
-        na, nb = rota(self.OriginalA,ang), rota(self.OriginalB,ang)
+        na, nb = rota(self.a,ang), rota(self.b,ang)
         natms, nenls = self.atms.copy(), self.enls.copy()
         nName = self.name+"(rot {}°)".format(ang)
         mr = Red(na, nb, enls=nenls, name=nName, prof=self.prof)
@@ -259,7 +267,7 @@ class Red:
             noa = noa + len(loa)
         return noa
 
-    def printReciprocalSpace(self, t=10, border=1.0):
+    def printReciprocalSpace(self, t=10, border=1.0,prnt=False):
         '''
         Imprime en pantalla la FBZ de la red en el espacio reciproco, si esta red pertenece a un sistema multicapa
         imprime tambien la FBZ de cada capa.
@@ -280,7 +288,7 @@ class Red:
         #"Pntamos" la FBZ de la red y el fondo dado por la función 'reciprocalBackgroundMesh'
         vl, eq = calcVerticesFBZ(self)
         xs, ys, linkList = reciprocalBackgroundMesh(self,vl,t)
-        fbzRed = Polygon(vl, alpha=0.7, color = 'gray', label = self.name)
+        fbzRed = Polygon(vl, alpha=0.7, color = 'gray', label = "Super Red")
         ax.add_patch(fbzRed)
 
         ax.add_collection(linkList)#"Pintamos" los enlaces de la red de fondo calculado previamente
@@ -288,5 +296,7 @@ class Red:
         ax.set(xlim=(-border,border), ylim=(-border,border))
         ax.legend(loc = 'upper right')
         print("...Terminado")
+        if prnt:
+            plt.savefig(('imagenes/SuperRed(RS)'),dpi=900, bbox_inches='tight')
         plt.show()
         return 1
