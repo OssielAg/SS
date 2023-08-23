@@ -131,8 +131,15 @@ class Red:
         f=s/difMax
         si=0.1
         sf=si+f
-        plt.axhline(y=(medY-(0.8*(difMax/2))), xmin=si, xmax=sf, c='royalblue')
-        plt.text((medX-(0.8*(difMax/2))), (medY-(0.78*(difMax/2))), "{} nm".format(s/10), fontsize=15, c='royalblue')
+        plt.text((medX-(0.75*(difMax/2))),
+                 (medY-(0.74*(difMax/2))),
+                 "{} nm".format(s/10),
+                 fontsize=14,
+                 weight='bold',
+                 c='royalblue',
+                 backgroundcolor='white')
+        plt.axhline(y=(medY-(0.8*(difMax/2))), xmin=si, xmax=sf, c='white',lw=8.0)
+        plt.axhline(y=(medY-(0.8*(difMax/2))), xmin=si, xmax=sf, c='royalblue',lw=4.0)
         
         if name!='':
             plt.savefig(('imagenes/'+name),dpi=900, bbox_inches='tight')

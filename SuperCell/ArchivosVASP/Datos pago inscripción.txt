@@ -1,0 +1,32 @@
+Bank Account
+Payment via Mexican Banks should be made by depositing in the following account:
+
+Bancomer: Account No. 0148388164
+CLABE: 012 180 00148388164 3
+In the name of: Soc. Mex. Ciencia y Tec. Sup. Y Mat
+
+Payments from Non-Mexican Banks should be made by deposit using the following account details:
+
+SWIFT code: BCMRMXMM
+Account: 0148388164
+In the name of: SOCIEDAD MEXICANA DE CIENCIA Y TECNOLOGIA DE SUPERFICIES Y MATERIALES
+Bank name: BBVA Bancomer
+Address: Av. IPN 1200, Col. Lindavista, 07300 México D.F 
+ABA: 021000021
+
+If you need assistance related to payments please contact Diana Garcia, she could be reached at the following
+
+at: diana.garcia@smctsm.org.mx 
+
+Tel: (+52)5557473828
+
+BANCOMER: Cuenta No. 0148388164
+CLABE: 012 180 00148388164 3
+A nombre de: Soc. Mex. Ciencia y Tec. de Sup. y Mat.
+
+Si el pago se va a efectuar por transferencia electrónica (SPEI),
+escriba por favor, su nombre en la línea “concepto”.
+Si el pago se efectúa en ventanilla de banco o se hace a través de
+transferencia bancaria (SPEI), envíe una copia escaneada a través
+del formulario de “Comprobante de pago” localizado en el menú de
+miembros. (Tener cuenta creada y acceder a ella). 
