@@ -123,8 +123,8 @@ def muestra(lor,r1,r2):
                            text2,
                            str(round(c[3],10))])
         print(table)
-        return 1
-    return 0
+        return table
+    return []
 
 def ajusta(r1,r2,t1,t2,p1,p2):
     '''
