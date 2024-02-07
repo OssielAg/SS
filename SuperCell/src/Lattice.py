@@ -127,13 +127,13 @@ class Red:
         medY = ((lmsy[0]+lmsy[1])/2)
         maxs.set(xlim=(medX-+(difMax/2),medX+(difMax/2)), ylim = (medY-+(difMax/2),medY+(difMax/2)))
         #Dibuja la escala de la imagen
-        s=max(round(difMax/4),1)
+        s=max(10**(round(math.log(difMax/4,10))),1)
         f=s/difMax
         si=0.1
         sf=si+f
         plt.text((medX-(0.75*(difMax/2))),
                  (medY-(0.74*(difMax/2))),
-                 "{} nm".format(s/10),
+                 str(s/10)+" nm",
                  fontsize=14,
                  weight='bold',
                  c='royalblue',
